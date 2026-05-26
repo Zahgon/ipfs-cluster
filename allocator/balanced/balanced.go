@@ -9,8 +9,6 @@ package balanced
 
 import (
 	"context"
-	"fmt"
-	"sort"
 
 	api "github.com/ipfs-cluster/ipfs-cluster/api"
 	logging "github.com/ipfs/go-log/v2"
@@ -28,29 +26,19 @@ type Allocator struct {
 }
 
 // New returns an initialized Allocator.
-func New(cfg *Config) (*Allocator, error) {
-	err := cfg.Validate()
-	if err != nil {
-		return nil, err
-	}
-
-	return &Allocator{
-		config: cfg,
-	}, nil
-}
+func New(cfg *Config) (*Allocator, error) { _ = "STUB: not implemented"; return nil, nil }
 
 // SetClient provides us with an rpc.Client which allows
 // contacting other components in the cluster.
 func (a *Allocator) SetClient(c *rpc.Client) {
-	a.rpcClient = c
+	_ = "STUB: not implemented"
+
+	// Shutdown is called on cluster shutdown. We just invalidate
+	// any metrics from this point.
+	return
 }
 
-// Shutdown is called on cluster shutdown. We just invalidate
-// any metrics from this point.
-func (a *Allocator) Shutdown(ctx context.Context) error {
-	a.rpcClient = nil
-	return nil
-}
+func (a *Allocator) Shutdown(ctx context.Context) error { _ = "STUB: not implemented"; return nil }
 
 type partitionedMetric struct {
 	metricName       string
@@ -71,191 +59,77 @@ type partition struct {
 // on the metrics and values given by the "by" slice. The partitions
 // are ordered based on the cumulative weight.
 func partitionMetrics(set api.MetricsSet, by []string) *partitionedMetric {
-	rootMetric := by[0]
-	pnedMetric := &partitionedMetric{
-		metricName: rootMetric,
-		partitions: partitionValues(set[rootMetric]),
-	}
-
-	// For sorting based on weight (more to less)
-	lessF := func(i, j int) bool {
-		wi := pnedMetric.partitions[i].weight
-		wj := pnedMetric.partitions[j].weight
-
-		// if weight is equal, sort by aggregated weight of
-		// all sub-partitions.
-		if wi == wj {
-			awi := pnedMetric.partitions[i].aggregatedWeight
-			awj := pnedMetric.partitions[j].aggregatedWeight
-			// If subpartitions weight the same, do strict order
-			// based on value string
-			if awi == awj {
-				return pnedMetric.partitions[i].value < pnedMetric.partitions[j].value
-			}
-			return awj < awi
-
-		}
-		// Descending!
-		return wj < wi
-	}
-
-	if len(by) == 1 { // we are done
-		sort.Slice(pnedMetric.partitions, lessF)
-		return pnedMetric
-	}
-
-	// process sub-partitions
-	for _, partition := range pnedMetric.partitions {
-		filteredSet := make(api.MetricsSet)
-		for k, v := range set {
-			if k == rootMetric { // not needed anymore
-				continue
-			}
-			for _, m := range v {
-				// only leave metrics for peers in current partition
-				if _, ok := partition.peers[m.Peer]; ok {
-					filteredSet[k] = append(filteredSet[k], m)
-				}
-			}
-		}
-
-		partition.sub = partitionMetrics(filteredSet, by[1:])
-
-		// Add the aggregated weight of the subpartitions
-		for _, subp := range partition.sub.partitions {
-			partition.aggregatedWeight += subp.aggregatedWeight
-		}
-	}
-	sort.Slice(pnedMetric.partitions, lessF)
-	return pnedMetric
+	_ = "STUB: not implemented"
+	return nil
 }
 
-func partitionValues(metrics []api.Metric) []*partition {
-	partitions := []*partition{}
+// For sorting based on weight (more to less)
 
-	if len(metrics) <= 0 {
-		return partitions
-	}
+// if weight is equal, sort by aggregated weight of
+// all sub-partitions.
 
-	// We group peers with the same value in the same partition.
-	partitionsByValue := make(map[string]*partition)
+// If subpartitions weight the same, do strict order
+// based on value string
 
-	for _, m := range metrics {
-		// Sometimes two metrics have the same value / weight, but we
-		// still want to put them in different partitions. Otherwise
-		// their weights get added and they form a bucket and
-		// therefore not they are not selected in order: 3 peers with
-		// freespace=100 and one peer with freespace=200 would result
-		// in one of the peers with freespace 100 being chosen first
-		// because the partition's weight is 300.
-		//
-		// We are going to call these metrics (like free-space),
-		// non-partitionable metrics. This is going to be the default
-		// (for backwards compat reasons).
-		//
-		// The informers must set the Partitionable field accordingly
-		// when two metrics with the same value must be grouped in the
-		// same partition.
-		//
-		// Note: aggregatedWeight is the same as weight here (sum of
-		// weight of all metrics in partitions), and gets updated
-		// later in partitionMetrics with the aggregated weight of
-		// sub-partitions.
-		if !m.Partitionable {
-			partitions = append(partitions, &partition{
-				value:            m.Value,
-				weight:           m.GetWeight(),
-				aggregatedWeight: m.GetWeight(),
-				peers: map[peer.ID]bool{
-					m.Peer: false,
-				},
-			})
-			continue
-		}
+// Descending!
 
-		// Any other case, we partition by value.
-		if p, ok := partitionsByValue[m.Value]; ok {
-			p.peers[m.Peer] = false
-			p.weight += m.GetWeight()
-			p.aggregatedWeight += m.GetWeight()
-		} else {
-			partitionsByValue[m.Value] = &partition{
-				value:            m.Value,
-				weight:           m.GetWeight(),
-				aggregatedWeight: m.GetWeight(),
-				peers: map[peer.ID]bool{
-					m.Peer: false,
-				},
-			}
-		}
+// we are done
 
-	}
-	for _, p := range partitionsByValue {
-		partitions = append(partitions, p)
-	}
-	return partitions
-}
+// process sub-partitions
+
+// not needed anymore
+
+// only leave metrics for peers in current partition
+
+// Add the aggregated weight of the subpartitions
+
+func partitionValues(metrics []api.Metric) []*partition { _ = "STUB: not implemented"; return nil }
+
+// We group peers with the same value in the same partition.
+
+// Sometimes two metrics have the same value / weight, but we
+// still want to put them in different partitions. Otherwise
+// their weights get added and they form a bucket and
+// therefore not they are not selected in order: 3 peers with
+// freespace=100 and one peer with freespace=200 would result
+// in one of the peers with freespace 100 being chosen first
+// because the partition's weight is 300.
+//
+// We are going to call these metrics (like free-space),
+// non-partitionable metrics. This is going to be the default
+// (for backwards compat reasons).
+//
+// The informers must set the Partitionable field accordingly
+// when two metrics with the same value must be grouped in the
+// same partition.
+//
+// Note: aggregatedWeight is the same as weight here (sum of
+// weight of all metrics in partitions), and gets updated
+// later in partitionMetrics with the aggregated weight of
+// sub-partitions.
+
+// Any other case, we partition by value.
 
 // Returns a list of peers sorted by never choosing twice from the same
 // partition if there is some other partition to choose from.
-func (pnedm *partitionedMetric) sortedPeers() []peer.ID {
-	peers := []peer.ID{}
-	for {
-		peer := pnedm.chooseNext()
-		if peer == "" { // This means we are done.
-			break
-		}
-		peers = append(peers, peer)
-	}
-	return peers
-}
+func (pnedm *partitionedMetric) sortedPeers() []peer.ID { _ = "STUB: not implemented"; return nil }
+
+// This means we are done.
 
 func (pnedm *partitionedMetric) chooseNext() peer.ID {
-	lenp := len(pnedm.partitions)
-	if lenp == 0 {
-		return ""
-	}
-
-	if pnedm.noMore {
-		return ""
-	}
-
-	var peer peer.ID
-
-	curPartition := pnedm.partitions[pnedm.curChoosingIndex]
-	done := 0
-	for {
-		if curPartition.sub != nil {
-			// Choose something from the sub-partitionedMetric
-			peer = curPartition.sub.chooseNext()
-		} else {
-			// We are a bottom-partition. Choose one of our peers
-			for pid, used := range curPartition.peers {
-				if !used {
-					peer = pid
-					curPartition.peers[pid] = true // mark as used
-					break
-				}
-			}
-		}
-		// look in next partition next time
-		pnedm.curChoosingIndex = (pnedm.curChoosingIndex + 1) % lenp
-		curPartition = pnedm.partitions[pnedm.curChoosingIndex]
-		done++
-
-		if peer != "" {
-			break
-		}
-
-		// no peer and we have looked in as many partitions as we have
-		if done == lenp {
-			pnedm.noMore = true
-			break
-		}
-	}
-
-	return peer
+	_ = "STUB: not implemented"
+	return *new(peer.ID)
 }
+
+// Choose something from the sub-partitionedMetric
+
+// We are a bottom-partition. Choose one of our peers
+
+// mark as used
+
+// look in next partition next time
+
+// no peer and we have looked in as many partitions as we have
 
 // Allocate produces a sorted list of cluster peer IDs based on different
 // metrics provided for those peer IDs.
@@ -276,6 +150,7 @@ func (a *Allocator) Allocate(
 	c api.Cid,
 	current, candidates, priority api.MetricsSet,
 ) ([]peer.ID, error) {
+	_ = "STUB: not implemented"
 
 	// For the allocation to work well, there have to be metrics of all
 	// the types for all the peers. There cannot be a metric of one type
@@ -285,43 +160,13 @@ func (a *Allocator) Allocate(
 	// allocator is called.
 	//
 	// Otherwise, the sorting might be funny.
-
-	candidatePartition := partitionMetrics(candidates, a.config.AllocateBy)
-	priorityPartition := partitionMetrics(priority, a.config.AllocateBy)
-
-	logger.Debugf("Balanced allocator partitions:\n%s\n", printPartition(candidatePartition, 0))
-	//fmt.Println(printPartition(candidatePartition, 0))
-
-	first := priorityPartition.sortedPeers()
-	last := candidatePartition.sortedPeers()
-
-	return append(first, last...), nil
+	return nil, nil
 }
+
+//fmt.Println(printPartition(candidatePartition, 0))
 
 // Metrics returns the names of the metrics that have been registered
 // with this allocator.
-func (a *Allocator) Metrics() []string {
-	return a.config.AllocateBy
-}
+func (a *Allocator) Metrics() []string { _ = "STUB: not implemented"; return nil }
 
-func printPartition(m *partitionedMetric, ind int) string {
-	str := ""
-	indent := func() {
-		for i := 0; i < ind+2; i++ {
-			str += " "
-		}
-	}
-
-	for _, p := range m.partitions {
-		indent()
-		str += fmt.Sprintf(" | %s:%s - %d - [", m.metricName, p.value, p.weight)
-		for p, u := range p.peers {
-			str += fmt.Sprintf("%s|%t, ", p, u)
-		}
-		str += "]\n"
-		if p.sub != nil {
-			str += printPartition(p.sub, ind+2)
-		}
-	}
-	return str
-}
+func printPartition(m *partitionedMetric, ind int) string { _ = "STUB: not implemented"; return "" }

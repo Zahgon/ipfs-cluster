@@ -9,11 +9,6 @@ type multiError struct {
 	err strings.Builder
 }
 
-func (e *multiError) add(err string) {
-	e.err.WriteString(err)
-	e.err.WriteString("; ")
-}
+func (e *multiError) add(err string) { _ = "STUB: not implemented"; return }
 
-func (e *multiError) Error() string {
-	return e.err.String()
-}
+func (e *multiError) Error() string { _ = "STUB: not implemented"; return "" }

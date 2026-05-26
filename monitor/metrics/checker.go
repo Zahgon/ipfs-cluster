@@ -39,135 +39,48 @@ type Checker struct {
 //
 // A value between 2.0 and 4.0 is suggested for the threshold.
 func NewChecker(ctx context.Context, metrics *Store) *Checker {
-	return &Checker{
-		ctx:         ctx,
-		alertCh:     make(chan api.Alert, AlertChannelCap),
-		metrics:     metrics,
-		failedPeers: make(map[peer.ID]map[string]int),
-	}
+	_ = "STUB: not implemented"
+	return nil
 }
 
 // CheckPeers will trigger alerts based on the latest metrics from the given peerset
 // when they have expired and no alert has been sent before.
-func (mc *Checker) CheckPeers(peers []peer.ID) error {
-	for _, name := range mc.metrics.MetricNames() {
-		for _, peer := range peers {
-			for _, metric := range mc.metrics.PeerMetricAll(name, peer) {
-				if mc.FailedMetric(metric.Name, peer) {
-					err := mc.alert(peer, metric.Name)
-					if err != nil {
-						return err
-					}
-				}
-			}
-		}
-	}
-	return nil
-}
+func (mc *Checker) CheckPeers(peers []peer.ID) error { _ = "STUB: not implemented"; return nil }
 
 // CheckAll will trigger alerts for all latest metrics when they have expired
 // and no alert has been sent before.
-func (mc *Checker) CheckAll() error {
-	for _, metric := range mc.metrics.AllMetrics() {
-		if mc.FailedMetric(metric.Name, metric.Peer) {
-			err := mc.alert(metric.Peer, metric.Name)
-			if err != nil {
-				return err
-			}
-		}
-	}
-
-	return nil
-}
+func (mc *Checker) CheckAll() error { _ = "STUB: not implemented"; return nil }
 
 // ResetAlerts clears up how many time a peer alerted for a given metric.
 // Thus, if it was over the threshold, it will start alerting again.
-func (mc *Checker) ResetAlerts(pid peer.ID, metricName string) {
-	mc.failedPeersMu.Lock()
-	defer mc.failedPeersMu.Unlock()
-
-	failedMetrics, ok := mc.failedPeers[pid]
-	if !ok {
-		return
-	}
-	delete(failedMetrics, metricName)
-	if len(mc.failedPeers[pid]) == 0 {
-		delete(mc.failedPeers, pid)
-	}
-}
+func (mc *Checker) ResetAlerts(pid peer.ID, metricName string) { _ = "STUB: not implemented"; return }
 
 func (mc *Checker) alert(pid peer.ID, metricName string) error {
-	mc.failedPeersMu.Lock()
-	defer mc.failedPeersMu.Unlock()
-
-	if _, ok := mc.failedPeers[pid]; !ok {
-		mc.failedPeers[pid] = make(map[string]int)
-	}
-	failedMetrics := mc.failedPeers[pid]
-	lastMetric := mc.metrics.PeerLatest(metricName, pid)
-	if !lastMetric.Defined() {
-		lastMetric = api.Metric{
-			Name: metricName,
-			Peer: pid,
-		}
-	}
-
-	failedMetrics[metricName]++
-	// If above threshold, do not send alert
-	if failedMetrics[metricName] > MaxAlertThreshold {
-		// Cleanup old metrics eventually
-		if failedMetrics[metricName] >= 300 {
-			delete(failedMetrics, metricName)
-			if len(mc.failedPeers[pid]) == 0 {
-				delete(mc.failedPeers, pid)
-			}
-		}
-		return nil
-	}
-
-	alrt := api.Alert{
-		Metric:      lastMetric,
-		TriggeredAt: time.Now(),
-	}
-	select {
-	case mc.alertCh <- alrt:
-	default:
-		return ErrAlertChannelFull
-	}
+	_ = "STUB: not implemented"
 	return nil
 }
 
+// If above threshold, do not send alert
+
+// Cleanup old metrics eventually
+
 // Alerts returns a channel which gets notified by CheckPeers.
 func (mc *Checker) Alerts() <-chan api.Alert {
-	return mc.alertCh
+	_ = "STUB: not implemented"
+
+	// Watch will trigger regular CheckPeers on the given interval. It will call
+	// peersF to obtain a peerset. It can be stopped by canceling the context.
+	// Usually you want to launch this in a goroutine.
+	return nil
 }
 
-// Watch will trigger regular CheckPeers on the given interval. It will call
-// peersF to obtain a peerset. It can be stopped by canceling the context.
-// Usually you want to launch this in a goroutine.
 func (mc *Checker) Watch(ctx context.Context, peersF func(context.Context) ([]peer.ID, error), interval time.Duration) {
-	ticker := time.NewTicker(interval)
-	for {
-		select {
-		case <-ticker.C:
-			if peersF != nil {
-				peers, err := peersF(ctx)
-				if err != nil {
-					continue
-				}
-				mc.CheckPeers(peers)
-			} else {
-				mc.CheckAll()
-			}
-		case <-ctx.Done():
-			ticker.Stop()
-			return
-		}
-	}
+	_ = "STUB: not implemented"
+	return
 }
 
 // FailedMetric returns if a peer is marked as failed for a particular metric.
 func (mc *Checker) FailedMetric(metric string, pid peer.ID) bool {
-	latest := mc.metrics.PeerLatest(metric, pid)
-	return latest.Expired()
+	_ = "STUB: not implemented"
+	return false
 }

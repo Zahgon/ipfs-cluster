@@ -2,15 +2,5 @@
 
 package fd
 
-import (
-	"golang.org/x/sys/unix"
-)
-
 // GetNumFDs returns the File Descriptors limit.
-func GetNumFDs() uint64 {
-	var l unix.Rlimit
-	if err := unix.Getrlimit(unix.RLIMIT_NOFILE, &l); err != nil {
-		return 0
-	}
-	return uint64(l.Cur)
-}
+func GetNumFDs() uint64 { _ = "STUB: not implemented"; return 0 }

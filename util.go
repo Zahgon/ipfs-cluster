@@ -1,40 +1,18 @@
 package ipfscluster
 
 import (
-	"bytes"
-	"encoding/json"
-	"errors"
-	"fmt"
-	"net"
-
 	blake2b "golang.org/x/crypto/blake2b"
 
 	"github.com/ipfs-cluster/ipfs-cluster/api"
 	"github.com/ipfs-cluster/ipfs-cluster/config"
 	peer "github.com/libp2p/go-libp2p/core/peer"
 	ma "github.com/multiformats/go-multiaddr"
-	madns "github.com/multiformats/go-multiaddr-dns"
 )
 
 // PeersFromMultiaddrs returns all the different peers in the given addresses.
 // each peer only will appear once in the result, even if several
 // multiaddresses for it are provided.
-func PeersFromMultiaddrs(addrs []ma.Multiaddr) []peer.ID {
-	var pids []peer.ID
-	pm := make(map[peer.ID]struct{})
-	for _, addr := range addrs {
-		pinfo, err := peer.AddrInfoFromP2pAddr(addr)
-		if err != nil {
-			continue
-		}
-		_, ok := pm[pinfo.ID]
-		if !ok {
-			pm[pinfo.ID] = struct{}{}
-			pids = append(pids, pinfo.ID)
-		}
-	}
-	return pids
-}
+func PeersFromMultiaddrs(addrs []ma.Multiaddr) []peer.ID { _ = "STUB: not implemented"; return nil }
 
 // // connect to a peer ID.
 // func connectToPeer(ctx context.Context, h host.Host, id peer.ID, addr ma.Multiaddr) error {
@@ -56,27 +34,11 @@ func PeersFromMultiaddrs(addrs []ma.Multiaddr) []peer.ID {
 // 	return addrs
 // }
 
-func logError(fmtstr string, args ...interface{}) error {
-	msg := fmt.Sprintf(fmtstr, args...)
-	logger.Error(msg)
-	return errors.New(msg)
-}
+func logError(fmtstr string, args ...interface{}) error { _ = "STUB: not implemented"; return nil }
 
-func containsPeer(list []peer.ID, peer peer.ID) bool {
-	for _, p := range list {
-		if p == peer {
-			return true
-		}
-	}
-	return false
-}
+func containsPeer(list []peer.ID, peer peer.ID) bool { _ = "STUB: not implemented"; return false }
 
-func minInt(x, y int) int {
-	if x < y {
-		return x
-	}
-	return y
-}
+func minInt(x, y int) int { _ = "STUB: not implemented"; return 0 }
 
 // // updatePinParents modifies the api.Pin input to give it the correct parents
 // // so that previous additions to the pins parents are maintained after this
@@ -100,67 +62,23 @@ type distanceChecker struct {
 	cache      map[peer.ID]distance
 }
 
-func (dc distanceChecker) isClosest(ci api.Cid) bool {
-	ciHash := convertKey(ci.KeyString())
-	localPeerHash := dc.convertPeerID(dc.local)
-	myDistance := xor(ciHash, localPeerHash)
+func (dc distanceChecker) isClosest(ci api.Cid) bool { _ = "STUB: not implemented"; return false }
 
-	for _, p := range dc.otherPeers {
-		peerHash := dc.convertPeerID(p)
-		distance := xor(peerHash, ciHash)
-
-		// if myDistance is larger than for other peers...
-		if bytes.Compare(myDistance[:], distance[:]) > 0 {
-			return false
-		}
-	}
-	return true
-}
+// if myDistance is larger than for other peers...
 
 // convertPeerID hashes a Peer ID (Multihash).
 func (dc distanceChecker) convertPeerID(id peer.ID) distance {
-	hash, ok := dc.cache[id]
-	if ok {
-		return hash
-	}
-
-	hashBytes := convertKey(string(id))
-	dc.cache[id] = hashBytes
-	return hashBytes
+	_ = "STUB: not implemented"
+	return *new(distance)
 }
 
 // convertKey hashes a key.
-func convertKey(id string) distance {
-	return blake2b.Sum256([]byte(id))
-}
+func convertKey(id string) distance { _ = "STUB: not implemented"; return *new(distance) }
 
-func xor(a, b distance) distance {
-	var c distance
-	for i := 0; i < len(c); i++ {
-		c[i] = a[i] ^ b[i]
-	}
-	return c
-}
+func xor(a, b distance) distance { _ = "STUB: not implemented"; return *new(distance) }
 
 // peersSubtract subtracts peers ID slice b from peers ID slice a.
-func peersSubtract(a []peer.ID, b []peer.ID) []peer.ID {
-	var result []peer.ID
-	bMap := make(map[peer.ID]struct{}, len(b))
-
-	for _, p := range b {
-		bMap[p] = struct{}{}
-	}
-
-	for _, p := range a {
-		_, ok := bMap[p]
-		if ok {
-			continue
-		}
-		result = append(result, p)
-	}
-
-	return result
-}
+func peersSubtract(a []peer.ID, b []peer.ID) []peer.ID { _ = "STUB: not implemented"; return nil }
 
 // pingValue describes the value carried by ping metrics
 type pingValue struct {
@@ -170,65 +88,25 @@ type pingValue struct {
 }
 
 // Valid returns true if the PingValue has IPFSID set.
-func (pv pingValue) Valid() bool {
-	return pv.IPFSID != ""
-}
+func (pv pingValue) Valid() bool { _ = "STUB: not implemented"; return false }
 
 // PingValue from metric parses a ping value from the value of a given metric,
 // if possible.
 func pingValueFromMetric(m api.Metric) (pv pingValue) {
-	json.Unmarshal([]byte(m.Value), &pv)
-	return
+	_ = "STUB: not implemented"
+	return *new(pingValue)
 }
 
-func publicIPFSAddresses(in []api.Multiaddr) []api.Multiaddr {
-	var out []api.Multiaddr
-	for _, maddr := range in {
-		if madns.Matches(maddr.Value()) { // a dns multiaddress: take it
-			out = append(out, maddr)
-			continue
-		}
+func publicIPFSAddresses(in []api.Multiaddr) []api.Multiaddr { _ = "STUB: not implemented"; return nil }
 
-		ip, err := maddr.ValueForProtocol(ma.P_IP4)
-		if err != nil {
-			ip, err = maddr.ValueForProtocol(ma.P_IP6)
-			if err != nil {
-				continue
-			}
-		}
-		// We have an IP in the multiaddress. Only include
-		// global unicast.
-		netip := net.ParseIP(ip)
-		if netip == nil {
-			continue
-		}
+// a dns multiaddress: take it
 
-		if !netip.IsGlobalUnicast() {
-			continue
-		}
-		out = append(out, maddr)
-	}
-	return out
-}
+// We have an IP in the multiaddress. Only include
+// global unicast.
 
 func toMultiAddrs(addrs config.Strings) ([]ma.Multiaddr, error) {
-	var mAddrs []ma.Multiaddr
-	for _, addr := range addrs {
-		mAddr, err := ma.NewMultiaddr(addr)
-		if err != nil {
-			return nil, err
-		}
-		mAddrs = append(mAddrs, mAddr)
-	}
-
-	return mAddrs, nil
+	_ = "STUB: not implemented"
+	return nil, nil
 }
 
-func multiAddrstoStrings(mAddrs []ma.Multiaddr) []string {
-	var addrs []string
-	for _, addr := range mAddrs {
-		addrs = append(addrs, addr.String())
-	}
-
-	return addrs
-}
+func multiAddrstoStrings(mAddrs []ma.Multiaddr) []string { _ = "STUB: not implemented"; return nil }

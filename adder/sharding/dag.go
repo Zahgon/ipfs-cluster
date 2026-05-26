@@ -18,11 +18,8 @@ package sharding
 
 import (
 	"context"
-	"fmt"
 
-	blocks "github.com/ipfs/go-block-format"
 	cid "github.com/ipfs/go-cid"
-	cbor "github.com/ipfs/go-ipld-cbor"
 	ipld "github.com/ipfs/go-ipld-format"
 	mh "github.com/multiformats/go-multihash"
 )
@@ -34,33 +31,13 @@ const hashFn = mh.SHA2_256
 // CborDataToNode parses cbor data into a clusterDAG node while making a few
 // checks
 func CborDataToNode(raw []byte, format string) (ipld.Node, error) {
-	if format != "cbor" {
-		return nil, fmt.Errorf("unexpected shard node format %s", format)
-	}
-	shardCid, err := cid.NewPrefixV1(cid.DagCBOR, hashFn).Sum(raw)
-	if err != nil {
-		return nil, err
-	}
-	shardBlk, err := blocks.NewBlockWithCid(raw, shardCid)
-	if err != nil {
-		return nil, err
-	}
-	shardNode, err := cbor.DecodeBlock(shardBlk)
-	if err != nil {
-		return nil, err
-	}
-	return shardNode, nil
+	_ = "STUB: not implemented"
+	return *new(ipld.Node), nil
 }
 
 func makeDAGSimple(ctx context.Context, dagObj map[string]cid.Cid) (ipld.Node, error) {
-	node, err := cbor.WrapObject(
-		dagObj,
-		hashFn, mh.DefaultLengths[hashFn],
-	)
-	if err != nil {
-		return nil, err
-	}
-	return node, err
+	_ = "STUB: not implemented"
+	return *new(ipld.Node), nil
 }
 
 // makeDAG parses a dagObj which stores all of the node-links a shardDAG
@@ -71,44 +48,19 @@ func makeDAGSimple(ctx context.Context, dagObj map[string]cid.Cid) (ipld.Node, e
 // is always the root of the shardDAG, i.e. the ipld node that should be
 // recursively pinned to track the shard
 func makeDAG(ctx context.Context, dagObj map[string]cid.Cid) ([]ipld.Node, error) {
+	_ = "STUB: not implemented"
 	// FIXME: We have a 4MB limit on the block size enforced by bitswap:
 	// https://github.com/libp2p/go-libp2p/core/blob/master/network/network.go#L23
-
-	// No indirect node
-	if len(dagObj) <= MaxLinks {
-		n, err := makeDAGSimple(ctx, dagObj)
-		return []ipld.Node{n}, err
-	}
-	// Indirect node required
-	leafNodes := make([]ipld.Node, 0)       // shardNodes with links to data
-	indirectObj := make(map[string]cid.Cid) // shardNode with links to shardNodes
-	numFullLeaves := len(dagObj) / MaxLinks
-	for i := 0; i <= numFullLeaves; i++ {
-		leafObj := make(map[string]cid.Cid)
-		for j := 0; j < MaxLinks; j++ {
-			c, ok := dagObj[fmt.Sprintf("%d", i*MaxLinks+j)]
-			if !ok { // finished with this leaf before filling all the way
-				if i != numFullLeaves {
-					panic("bad state, should never be here")
-				}
-				break
-			}
-			leafObj[fmt.Sprintf("%d", j)] = c
-		}
-		leafNode, err := makeDAGSimple(ctx, leafObj)
-		if err != nil {
-			return nil, err
-		}
-		indirectObj[fmt.Sprintf("%d", i)] = leafNode.Cid()
-		leafNodes = append(leafNodes, leafNode)
-	}
-	indirectNode, err := makeDAGSimple(ctx, indirectObj)
-	if err != nil {
-		return nil, err
-	}
-	nodes := append([]ipld.Node{indirectNode}, leafNodes...)
-	return nodes, nil
+	return nil, nil
 }
+
+// No indirect node
+
+// Indirect node required
+// shardNodes with links to data
+// shardNode with links to shardNodes
+
+// finished with this leaf before filling all the way
 
 // TODO: decide whether this is worth including. Is precision important for
 // most usecases?  Is being a little over the shard size a serious problem?

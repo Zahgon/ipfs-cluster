@@ -5,25 +5,7 @@ import (
 )
 
 // PeersToStrings Encodes a list of peers.
-func PeersToStrings(peers []peer.ID) []string {
-	strs := make([]string, len(peers))
-	for i, p := range peers {
-		if p != "" {
-			strs[i] = p.String()
-		}
-	}
-	return strs
-}
+func PeersToStrings(peers []peer.ID) []string { _ = "STUB: not implemented"; return nil }
 
 // StringsToPeers decodes peer.IDs from strings.
-func StringsToPeers(strs []string) []peer.ID {
-	peers := []peer.ID{}
-	for _, p := range strs {
-		pid, err := peer.Decode(p)
-		if err != nil {
-			continue
-		}
-		peers = append(peers, pid)
-	}
-	return peers
-}
+func StringsToPeers(strs []string) []peer.ID { _ = "STUB: not implemented"; return nil }

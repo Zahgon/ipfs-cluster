@@ -2,15 +2,8 @@
 
 package optracker
 
-import "strconv"
-
 const _OperationType_name = "OperationUnknownOperationPinOperationUnpinOperationRemoteOperationShard"
 
 var _OperationType_index = [...]uint8{0, 16, 28, 42, 57, 71}
 
-func (i OperationType) String() string {
-	if i < 0 || i >= OperationType(len(_OperationType_index)-1) {
-		return "OperationType(" + strconv.FormatInt(int64(i), 10) + ")"
-	}
-	return _OperationType_name[_OperationType_index[i]:_OperationType_index[i+1]]
-}
+func (i OperationType) String() string { _ = "STUB: not implemented"; return "" }

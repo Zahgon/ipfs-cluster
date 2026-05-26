@@ -10,18 +10,7 @@ import (
 	cluster "github.com/ipfs-cluster/ipfs-cluster"
 )
 
-func rpcTypeStr(t cluster.RPCEndpointType) string {
-	switch t {
-	case cluster.RPCClosed:
-		return "RPCClosed"
-	case cluster.RPCTrusted:
-		return "RPCTrusted"
-	case cluster.RPCOpen:
-		return "RPCOpen"
-	default:
-		return "ERROR"
-	}
-}
+func rpcTypeStr(t cluster.RPCEndpointType) string { _ = "STUB: not implemented"; return "" }
 
 var comments = map[string]string{
 	"Cluster.PeerAdd":           "Used by Join()",

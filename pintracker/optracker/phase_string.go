@@ -2,15 +2,8 @@
 
 package optracker
 
-import "strconv"
-
 const _Phase_name = "PhaseErrorPhaseQueuedPhaseInProgressPhaseDone"
 
 var _Phase_index = [...]uint8{0, 10, 21, 36, 45}
 
-func (i Phase) String() string {
-	if i < 0 || i >= Phase(len(_Phase_index)-1) {
-		return "Phase(" + strconv.FormatInt(int64(i), 10) + ")"
-	}
-	return _Phase_name[_Phase_index[i]:_Phase_index[i+1]]
-}
+func (i Phase) String() string { _ = "STUB: not implemented"; return "" }

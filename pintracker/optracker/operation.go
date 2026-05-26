@@ -2,13 +2,10 @@ package optracker
 
 import (
 	"context"
-	"fmt"
-	"strings"
 	"sync"
 	"time"
 
 	"github.com/ipfs-cluster/ipfs-cluster/api"
-	"go.opencensus.io/trace"
 )
 
 //go:generate stringer -type=OperationType
@@ -70,241 +67,93 @@ type Operation struct {
 
 // newOperation creates a new Operation.
 func newOperation(ctx context.Context, pin api.Pin, typ OperationType, ph Phase, tracker *OperationTracker) *Operation {
-	ctx, span := trace.StartSpan(ctx, "optracker/NewOperation")
-	defer span.End()
-
-	ctx, cancel := context.WithCancel(ctx)
-	op := &Operation{
-		ctx:    ctx,
-		cancel: cancel,
-
-		tracker: tracker,
-
-		pin:          pin,
-		opType:       typ,
-		phase:        ph,
-		attemptCount: 0,
-		priority:     false,
-		ts:           time.Now(),
-		error:        "",
-	}
-	return op
+	_ = "STUB: not implemented"
+	return nil
 }
 
 // String returns a string representation of an Operation.
-func (op *Operation) String() string {
-	var b strings.Builder
-
-	fmt.Fprintf(&b, "type: %s\n", op.Type().String())
-	fmt.Fprint(&b, "pin:\n")
-	pinstr := op.Pin().String()
-	pinstrs := strings.SplitSeq(pinstr, "\n")
-	for s := range pinstrs {
-		fmt.Fprintf(&b, "\t%s\n", s)
-	}
-	fmt.Fprintf(&b, "phase: %s\n", op.Phase().String())
-	fmt.Fprintf(&b, "attemptCount: %d\n", op.AttemptCount())
-	fmt.Fprintf(&b, "error: %s\n", op.Error())
-	fmt.Fprintf(&b, "timestamp: %s\n", op.Timestamp().String())
-
-	return b.String()
-}
+func (op *Operation) String() string { _ = "STUB: not implemented"; return "" }
 
 // Cid returns the Cid associated to this operation.
 func (op *Operation) Cid() api.Cid {
-	return op.pin.Cid
+	_ = "STUB: not implemented"
+
+	// Context returns the context associated to this operation.
+	return *new(api.Cid)
 }
 
-// Context returns the context associated to this operation.
 func (op *Operation) Context() context.Context {
-	return op.ctx
+	_ = "STUB: not implemented"
+
+	// Cancel will cancel the context associated to this operation.
+	return *new(context.Context)
 }
 
-// Cancel will cancel the context associated to this operation.
 func (op *Operation) Cancel() {
-	op.cancel()
+	_ = "STUB: not implemented"
+
+	// Phase returns the Phase.
+	return
 }
 
-// Phase returns the Phase.
-func (op *Operation) Phase() Phase {
-	var ph Phase
-
-	op.mu.RLock()
-	ph = op.phase
-	op.mu.RUnlock()
-
-	return ph
-}
+func (op *Operation) Phase() Phase { _ = "STUB: not implemented"; return *new(Phase) }
 
 // SetPhase changes the Phase and updates the timestamp.
-func (op *Operation) SetPhase(ph Phase) {
-	op.mu.Lock()
-	{
-		op.tracker.recordMetricUnsafe(op, -1)
-		op.phase = ph
-		op.ts = time.Now()
-		op.tracker.recordMetricUnsafe(op, 1)
-	}
-	op.mu.Unlock()
-}
+func (op *Operation) SetPhase(ph Phase) { _ = "STUB: not implemented"; return }
 
 // AttemptCount returns the number of times that this operation has been in
 // progress.
-func (op *Operation) AttemptCount() int {
-	var retries int
-
-	op.mu.RLock()
-	retries = op.attemptCount
-	op.mu.RUnlock()
-
-	return retries
-}
+func (op *Operation) AttemptCount() int { _ = "STUB: not implemented"; return 0 }
 
 // IncAttempt does a plus-one on the AttemptCount.
-func (op *Operation) IncAttempt() {
-	op.mu.Lock()
-	op.attemptCount++
-	op.mu.Unlock()
-}
+func (op *Operation) IncAttempt() { _ = "STUB: not implemented"; return }
 
 // PriorityPin returns true if the pin has been marked as priority pin.
-func (op *Operation) PriorityPin() bool {
-	var p bool
-	op.mu.RLock()
-	p = op.priority
-	op.mu.RUnlock()
-	return p
-}
+func (op *Operation) PriorityPin() bool { _ = "STUB: not implemented"; return false }
 
 // SetPriorityPin returns true if the pin has been marked as priority pin.
-func (op *Operation) SetPriorityPin(p bool) {
-	op.mu.Lock()
-	op.priority = p
-	op.mu.Unlock()
-}
+func (op *Operation) SetPriorityPin(p bool) { _ = "STUB: not implemented"; return }
 
 // Error returns any error message attached to the operation.
-func (op *Operation) Error() string {
-	var err string
-	op.mu.RLock()
-	err = op.error
-	op.mu.RUnlock()
-	return err
-}
+func (op *Operation) Error() string { _ = "STUB: not implemented"; return "" }
 
 // SetError sets the phase to PhaseError along with
 // an error message. It updates the timestamp.
-func (op *Operation) SetError(err error) {
-	op.mu.Lock()
-	{
-		op.tracker.recordMetricUnsafe(op, -1)
-		op.phase = PhaseError
-		op.error = err.Error()
-		op.ts = time.Now()
-		op.tracker.recordMetricUnsafe(op, 1)
-	}
-	op.mu.Unlock()
-}
+func (op *Operation) SetError(err error) { _ = "STUB: not implemented"; return }
 
 // Type returns the operation Type.
 func (op *Operation) Type() OperationType {
-	return op.opType
+	_ = "STUB: not implemented"
+
+	// Pin returns the Pin object associated to the operation.
+	return *new(OperationType)
 }
 
-// Pin returns the Pin object associated to the operation.
 func (op *Operation) Pin() api.Pin {
-	return op.pin
+	_ = "STUB: not implemented"
+
+	// Timestamp returns the time when this operation was
+	// last modified (phase changed, error was set...).
+	return *new(api.Pin)
 }
 
-// Timestamp returns the time when this operation was
-// last modified (phase changed, error was set...).
-func (op *Operation) Timestamp() time.Time {
-	var ts time.Time
-	op.mu.RLock()
-	ts = op.ts
-	op.mu.RUnlock()
-	return ts
-}
+func (op *Operation) Timestamp() time.Time { _ = "STUB: not implemented"; return *new(time.Time) }
 
 // Canceled returns whether the context for this
 // operation has been canceled.
-func (op *Operation) Canceled() bool {
-	select {
-	case <-op.ctx.Done():
-		return true
-	default:
-		return false
-	}
-}
+func (op *Operation) Canceled() bool { _ = "STUB: not implemented"; return false }
 
 // ToTrackerStatus returns an api.TrackerStatus reflecting
 // the current status of this operation. It's a translation
 // from the Type and the Phase.
 func (op *Operation) ToTrackerStatus() api.TrackerStatus {
-	typ := op.Type()
-	ph := op.Phase()
-	switch typ {
-	case OperationPin:
-		switch ph {
-		case PhaseError:
-			return api.TrackerStatusPinError
-		case PhaseQueued:
-			return api.TrackerStatusPinQueued
-		case PhaseInProgress:
-			return api.TrackerStatusPinning
-		case PhaseDone:
-			return api.TrackerStatusPinned
-		default:
-			return api.TrackerStatusUndefined
-		}
-	case OperationUnpin:
-		switch ph {
-		case PhaseError:
-			return api.TrackerStatusUnpinError
-		case PhaseQueued:
-			return api.TrackerStatusUnpinQueued
-		case PhaseInProgress:
-			return api.TrackerStatusUnpinning
-		case PhaseDone:
-			return api.TrackerStatusUnpinned
-		default:
-			return api.TrackerStatusUndefined
-		}
-	case OperationRemote:
-		return api.TrackerStatusRemote
-	case OperationShard:
-		return api.TrackerStatusSharded
-	default:
-		return api.TrackerStatusUndefined
-	}
-
+	_ = "STUB: not implemented"
+	return *new(api.TrackerStatus)
 }
 
 // TrackerStatusToOperationPhase takes an api.TrackerStatus and
 // converts it to an OpType and Phase.
 func TrackerStatusToOperationPhase(status api.TrackerStatus) (OperationType, Phase) {
-	switch status {
-	case api.TrackerStatusPinError:
-		return OperationPin, PhaseError
-	case api.TrackerStatusPinQueued:
-		return OperationPin, PhaseQueued
-	case api.TrackerStatusPinning:
-		return OperationPin, PhaseInProgress
-	case api.TrackerStatusPinned:
-		return OperationPin, PhaseDone
-	case api.TrackerStatusUnpinError:
-		return OperationUnpin, PhaseError
-	case api.TrackerStatusUnpinQueued:
-		return OperationUnpin, PhaseQueued
-	case api.TrackerStatusUnpinning:
-		return OperationUnpin, PhaseInProgress
-	case api.TrackerStatusUnpinned:
-		return OperationUnpin, PhaseDone
-	case api.TrackerStatusRemote:
-		return OperationRemote, PhaseDone
-	case api.TrackerStatusSharded:
-		return OperationShard, PhaseDone
-	default:
-		return OperationUnknown, PhaseError
-	}
+	_ = "STUB: not implemented"
+	return *new(OperationType), *new(Phase)
 }

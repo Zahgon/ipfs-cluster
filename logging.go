@@ -49,6 +49,7 @@ var LoggingFacilitiesExtra = map[string]string{
 
 // SetFacilityLogLevel sets the log level for a given module
 func SetFacilityLogLevel(f, l string) {
+	_ = "STUB: not implemented"
 	/*
 		case "debug", "DEBUG":
 			*l = DebugLevel
@@ -64,6 +65,5 @@ func SetFacilityLogLevel(f, l string) {
 			*l = PanicLevel
 		case "fatal", "FATAL":
 			*l = FatalLevel
-	*/
-	logging.SetLogLevel(f, l)
+	*/return
 }

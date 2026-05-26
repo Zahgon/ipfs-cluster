@@ -4,16 +4,10 @@ package adder
 
 import (
 	"context"
-	"errors"
-	"fmt"
-	"io"
 	"mime/multipart"
-	"strings"
 
 	"github.com/ipfs-cluster/ipfs-cluster/adder/ipfsadd"
 	"github.com/ipfs-cluster/ipfs-cluster/api"
-	"github.com/ipfs/boxo/ipld/unixfs"
-	"github.com/ipld/go-car"
 	peer "github.com/libp2p/go-libp2p/core/peer"
 
 	files "github.com/ipfs/boxo/files"
@@ -28,7 +22,6 @@ import (
 	cidlink "github.com/ipld/go-ipld-prime/linking/cid"
 	"github.com/ipld/go-ipld-prime/multicodec"
 	"github.com/ipld/go-ipld-prime/node/basicnode"
-	multihash "github.com/multiformats/go-multihash"
 )
 
 var logger = logging.Logger("adder")
@@ -92,112 +85,38 @@ type Adder struct {
 //
 // An Adder may only be used once.
 func New(ds ClusterDAGService, p api.AddParams, out chan api.AddedOutput) *Adder {
+	_ = "STUB: not implemented"
 	// Discard all progress update output as the caller has not provided
 	// a channel for them to listen on.
-	if out == nil {
-		out = make(chan api.AddedOutput, 100)
-		go func() {
-			for range out {
-			}
-		}()
-	}
-
-	return &Adder{
-		dgs:    ds,
-		params: p,
-		output: out,
-	}
+	return nil
 }
 
 func (a *Adder) setContext(ctx context.Context) {
-	if a.ctx == nil { // only allows first context
-		ctxc, cancel := context.WithCancel(ctx)
-		a.ctx = ctxc
-		a.cancel = cancel
-	}
+	_ = "STUB: not implemented"
+	// only allows first context
+	return
 }
 
 // FromMultipart adds content from a multipart.Reader. The adder will
 // no longer be usable after calling this method.
 func (a *Adder) FromMultipart(ctx context.Context, r *multipart.Reader) (api.Cid, error) {
-	logger.Debugf("adding from multipart with params: %+v", a.params)
-
-	f, err := files.NewFileFromPartReader(r, "multipart/form-data")
-	if err != nil {
-		return api.CidUndef, err
-	}
-	defer f.Close()
-	return a.FromFiles(ctx, f)
+	_ = "STUB: not implemented"
+	return *new(api.Cid), nil
 }
 
 // FromFiles adds content from a files.Directory. The adder will no longer
 // be usable after calling this method.
 func (a *Adder) FromFiles(ctx context.Context, f files.Directory) (api.Cid, error) {
-	logger.Debug("adding from files")
-	a.setContext(ctx)
-
-	if a.ctx.Err() != nil { // don't allow running twice
-		return api.CidUndef, a.ctx.Err()
-	}
-
-	defer a.cancel()
-	defer close(a.output)
-
-	var dagFmtr dagFormatter
-	var err error
-	switch a.params.Format {
-	case "", "unixfs":
-		dagFmtr, err = newIpfsAdder(ctx, a.dgs, a.params, a.output)
-
-	case "car":
-		dagFmtr, err = newCarAdder(ctx, a.dgs, a.params, a.output)
-	default:
-		err = errors.New("bad dag formatter option")
-	}
-	if err != nil {
-		return api.CidUndef, err
-	}
-
-	// setup wrapping
-	if a.params.Wrap {
-		f = files.NewSliceDirectory(
-			[]files.DirEntry{files.FileEntry("", f)},
-		)
-	}
-
-	it := f.Entries()
-	var adderRoot api.Cid
-	for it.Next() {
-		select {
-		case <-a.ctx.Done():
-			return api.CidUndef, a.ctx.Err()
-		default:
-			logger.Debugf("ipfsAdder AddFile(%s)", it.Name())
-
-			adderRoot, err = dagFmtr.Add(ctx, it.Name(), it.Node())
-			if err != nil {
-				logger.Error("error adding to cluster: ", err)
-				return api.CidUndef, err
-			}
-		}
-		// TODO (hector): We can only add a single CAR file for the
-		// moment.
-		if a.params.Format == "car" {
-			break
-		}
-	}
-	if it.Err() != nil {
-		return api.CidUndef, it.Err()
-	}
-
-	clusterRoot, err := a.dgs.Finalize(a.ctx, adderRoot)
-	if err != nil {
-		logger.Error("error finalizing adder:", err)
-		return api.CidUndef, err
-	}
-	logger.Infof("%s successfully added to cluster", clusterRoot)
-	return clusterRoot, nil
+	_ = "STUB: not implemented"
+	return *new(api.Cid), nil
 }
+
+// don't allow running twice
+
+// setup wrapping
+
+// TODO (hector): We can only add a single CAR file for the
+// moment.
 
 // A wrapper around the ipfsadd.Adder to satisfy the dagFormatter interface.
 type ipfsAdder struct {
@@ -205,38 +124,14 @@ type ipfsAdder struct {
 }
 
 func newIpfsAdder(ctx context.Context, dgs ClusterDAGService, params api.AddParams, out chan api.AddedOutput) (*ipfsAdder, error) {
-	iadder, err := ipfsadd.NewAdder(ctx, dgs, dgs.Allocations)
-	if err != nil {
-		logger.Error(err)
-		return nil, err
-	}
-
-	iadder.Trickle = params.Layout == "trickle"
-	iadder.RawLeaves = params.RawLeaves
-	iadder.Chunker = params.Chunker
-	iadder.Out = out
-	iadder.Progress = params.Progress
-	iadder.NoCopy = params.NoCopy
-
-	// Set up prefi
-	prefix, err := merkledag.PrefixForCidVersion(params.CidVersion)
-	if err != nil {
-		return nil, fmt.Errorf("bad CID Version: %s", err)
-	}
-
-	hashFunCode, ok := multihash.Names[strings.ToLower(params.HashFun)]
-	if !ok {
-		return nil, errors.New("hash function name not known")
-	}
-	prefix.MhType = hashFunCode
-	prefix.MhLength = -1
-	iadder.CidBuilder = &prefix
-	return &ipfsAdder{
-		Adder: iadder,
-	}, nil
+	_ = "STUB: not implemented"
+	return nil, nil
 }
 
+// Set up prefi
+
 func (ia *ipfsAdder) Add(ctx context.Context, name string, f files.Node) (api.Cid, error) {
+	_ = "STUB: not implemented"
 	// In order to set the AddedOutput names right, we use
 	// OutputPrefix:
 	//
@@ -251,13 +146,7 @@ func (ia *ipfsAdder) Add(ctx context.Context, name string, f files.Node) (api.Ci
 	// events with the right names. We addressed this by adding
 	// OutputPrefix to our version. go-ipfs modifies emitted
 	// events before sending to user).
-	ia.OutputPrefix = name
-
-	nd, err := ia.AddAllAndPin(ctx, f)
-	if err != nil {
-		return api.CidUndef, err
-	}
-	return api.NewCid(nd.Cid()), nil
+	return *new(api.Cid), nil
 }
 
 // An adder to add CAR files. It is at the moment very basic, and can
@@ -273,75 +162,16 @@ type carAdder struct {
 }
 
 func newCarAdder(ctx context.Context, dgs ClusterDAGService, params api.AddParams, out chan api.AddedOutput) (*carAdder, error) {
-	return &carAdder{
-		ctx:    ctx,
-		dgs:    dgs,
-		params: params,
-		output: out,
-	}, nil
+	_ = "STUB: not implemented"
+	return nil, nil
 }
 
 // Add takes a node which should be a CAR file and nothing else and
 // adds its blocks using the ClusterDAGService.
 func (ca *carAdder) Add(ctx context.Context, name string, fn files.Node) (api.Cid, error) {
-	if ca.params.Wrap {
-		return api.CidUndef, errors.New("cannot wrap a CAR file upload")
-	}
-
-	f, ok := fn.(files.File)
-	if !ok {
-		return api.CidUndef, errors.New("expected CAR file is not of type file")
-	}
-	carReader, err := car.NewCarReader(f)
-	if err != nil {
-		return api.CidUndef, err
-	}
-
-	if len(carReader.Header.Roots) != 1 {
-		return api.CidUndef, errors.New("only CAR files with a single root are supported")
-	}
-
-	root := carReader.Header.Roots[0]
-	bytes := uint64(0)
-	size := uint64(0)
-
-	for {
-		block, err := carReader.Next()
-		if err != nil && err != io.EOF {
-			return api.CidUndef, err
-		} else if block == nil {
-			break
-		}
-
-		bytes += uint64(len(block.RawData()))
-
-		nd, err := ipldDecoder.DecodeNode(context.TODO(), block)
-		if err != nil {
-			return api.CidUndef, err
-		}
-
-		// If the root is in the CAR and the root is a UnixFS
-		// node, then set the size in the output object.
-		if nd.Cid().Equals(root) {
-			ufs, err := unixfs.ExtractFSNode(nd)
-			if err == nil {
-				size = ufs.FileSize()
-			}
-		}
-
-		err = ca.dgs.Add(ca.ctx, nd)
-		if err != nil {
-			return api.CidUndef, err
-		}
-	}
-
-	ca.output <- api.AddedOutput{
-		Name:        name,
-		Cid:         api.NewCid(root),
-		Bytes:       bytes,
-		Size:        size,
-		Allocations: ca.dgs.Allocations(),
-	}
-
-	return api.NewCid(root), nil
+	_ = "STUB: not implemented"
+	return *new(api.Cid), nil
 }
+
+// If the root is in the CAR and the root is a UnixFS
+// node, then set the size in the output object.

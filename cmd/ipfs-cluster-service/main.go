@@ -13,11 +13,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	ipfslite "github.com/hsanjuan/ipfs-lite"
 	ipfscluster "github.com/ipfs-cluster/ipfs-cluster"
 	"github.com/ipfs-cluster/ipfs-cluster/api"
 	"github.com/ipfs-cluster/ipfs-cluster/cmdutils"
-	"github.com/ipfs-cluster/ipfs-cluster/consensus/crdt"
 	"github.com/ipfs-cluster/ipfs-cluster/pstoremgr"
 	"github.com/ipfs-cluster/ipfs-cluster/version"
 	peer "github.com/libp2p/go-libp2p/core/peer"
@@ -25,8 +23,6 @@ import (
 	ma "github.com/multiformats/go-multiaddr"
 
 	semver "github.com/blang/semver"
-	"github.com/ipfs/go-datastore"
-	"github.com/ipfs/go-datastore/namespace"
 	dscrdt "github.com/ipfs/go-ds-crdt"
 	logging "github.com/ipfs/go-log/v2"
 	cli "github.com/urfave/cli"
@@ -170,23 +166,9 @@ func init() {
 	gologshim.SetDefaultHandler(logging.SlogHandler())
 }
 
-func out(m string, a ...interface{}) {
-	fmt.Fprintf(os.Stderr, m, a...)
-}
+func out(m string, a ...interface{}) { _ = "STUB: not implemented"; return }
 
-func checkErr(doing string, err error, args ...interface{}) {
-	if err != nil {
-		if len(args) > 0 {
-			doing = fmt.Sprintf(doing, args...)
-		}
-		out("error %s: %s\n", doing, err)
-		err = locker.tryUnlock()
-		if err != nil {
-			out("error releasing execution lock: %s\n", err)
-		}
-		os.Exit(1)
-	}
-}
+func checkErr(doing string, err error, args ...interface{}) { _ = "STUB: not implemented"; return }
 
 func main() {
 	app := cli.NewApp()
@@ -758,181 +740,45 @@ to all effects. Peers may need to bootstrap and sync from scratch after this.
 }
 
 // run daemon() by default, or error.
-func run(c *cli.Context) error {
-	cli.ShowAppHelp(c)
-	os.Exit(1)
-	return nil
-}
+func run(c *cli.Context) error { _ = "STUB: not implemented"; return nil }
 
 func setupLogLevel(debug bool, l string) error {
+	_ = "STUB: not implemented"
 	// if debug is set to true, log everything in debug level
-	if debug {
-		ipfscluster.SetFacilityLogLevel("*", "DEBUG")
-		return nil
-	}
-
-	compLogLevel := strings.Split(l, ",")
-	var logLevel string
-	compLogFacs := make(map[string]string)
-	// get overall log level and component-wise log levels from arguments
-	for _, cll := range compLogLevel {
-		if cll == "" {
-			continue
-		}
-		identifierToLevel := strings.Split(cll, ":")
-		var lvl string
-		var comp string
-		switch len(identifierToLevel) {
-		case 1:
-			lvl = identifierToLevel[0]
-			comp = "all"
-		case 2:
-			lvl = identifierToLevel[1]
-			comp = identifierToLevel[0]
-		default:
-			return errors.New("log level not in expected format \"identifier:loglevel\" or \"loglevel\"")
-		}
-
-		_, ok := compLogFacs[comp]
-		if ok {
-			fmt.Printf("overwriting existing %s log level\n", comp)
-		}
-		compLogFacs[comp] = lvl
-	}
-
-	logLevel, ok := compLogFacs["all"]
-	if !ok {
-		logLevel = defaultLogLevel
-	} else {
-		delete(compLogFacs, "all")
-	}
-
-	// log service with logLevel
-	ipfscluster.SetFacilityLogLevel("service", logLevel)
-
-	logfacs := make(map[string]string)
-
-	// fill component-wise log levels
-	for identifier, level := range compLogFacs {
-		logfacs[identifier] = level
-	}
-
-	// Set the values for things not set by the user or for
-	// things set by "all".
-	for key := range ipfscluster.LoggingFacilities {
-		if _, ok := logfacs[key]; !ok {
-			logfacs[key] = logLevel
-		}
-	}
-
-	// For Extra facilities, set the defaults per logging.go unless
-	// manually set
-	for key, defaultLvl := range ipfscluster.LoggingFacilitiesExtra {
-		if _, ok := logfacs[key]; !ok {
-			logfacs[key] = defaultLvl
-		}
-	}
-
-	for identifier, level := range logfacs {
-		ipfscluster.SetFacilityLogLevel(identifier, level)
-	}
-
 	return nil
 }
 
-func userProvidedSecret(enterSecret bool) ([]byte, bool) {
-	if enterSecret {
-		secret := promptUser("Enter cluster secret (32-byte hex string): ")
-		decodedSecret, err := ipfscluster.DecodeClusterSecret(secret)
-		checkErr("parsing user-provided secret", err)
-		return decodedSecret, true
-	}
+// get overall log level and component-wise log levels from arguments
 
+// log service with logLevel
+
+// fill component-wise log levels
+
+// Set the values for things not set by the user or for
+// things set by "all".
+
+// For Extra facilities, set the defaults per logging.go unless
+// manually set
+
+func userProvidedSecret(enterSecret bool) ([]byte, bool) {
+	_ = "STUB: not implemented"
 	return nil, false
 }
 
-func promptUser(msg string) string {
-	scanner := bufio.NewScanner(os.Stdin)
-	fmt.Print(msg)
-	scanner.Scan()
-	return scanner.Text()
-}
+func promptUser(msg string) string { _ = "STUB: not implemented"; return "" }
 
 // Lifted from go-ipfs/cmd/ipfs/daemon.go
-func yesNoPrompt(prompt string) bool {
-	var s string
-	for i := 0; i < 3; i++ {
-		fmt.Printf("%s ", prompt)
-		fmt.Scanf("%s", &s)
-		switch s {
-		case "y", "Y":
-			return true
-		case "n", "N":
-			return false
-		case "":
-			return false
-		}
-		fmt.Println("Please press either 'y' or 'n'")
-	}
-	return false
-}
+func yesNoPrompt(prompt string) bool { _ = "STUB: not implemented"; return false }
 
 func getStateManager() cmdutils.StateManager {
-	cfgHelper, err := cmdutils.NewLoadedConfigHelper(
-		configPath,
-		identityPath,
-	)
-	checkErr("loading configurations", err)
-	cfgHelper.Manager().Shutdown()
-	mgr, err := cmdutils.NewStateManagerWithHelper(cfgHelper)
-	checkErr("creating state manager", err)
-	return mgr
+	_ = "STUB: not implemented"
+	return *new(cmdutils.StateManager)
 }
 
 func getCrdt() *dscrdt.Datastore {
+	_ = "STUB: not implemented"
 	// Load all the configurations and identity
-	cfgHelper, err := cmdutils.NewLoadedConfigHelper(configPath, identityPath)
-	checkErr("loading configurations", err)
-	defer cfgHelper.Manager().Shutdown()
-
-	// Get a state manager and the datastore
-	mgr, err := cmdutils.NewStateManagerWithHelper(cfgHelper)
-	checkErr("creating state manager", err)
-	store, err := mgr.GetStore()
-	checkErr("opening datastore", err)
-	batching, ok := store.(datastore.Batching)
-	if !ok {
-		checkErr("", errors.New("no batching store"))
-	}
-
-	crdtNs := cfgHelper.Configs().Crdt.DatastoreNamespace
-
-	var blocksDatastore datastore.Batching = namespace.Wrap(
-		batching,
-		datastore.NewKey(crdtNs).ChildString(crdt.BlocksNs),
-	)
-
-	ipfs, err := ipfslite.New(
-		context.Background(),
-		blocksDatastore,
-		nil,
-		nil,
-		nil,
-		&ipfslite.Config{
-			Offline: true,
-		},
-	)
-	checkErr("creating ipfs-lite offline node", err)
-
-	opts := dscrdt.DefaultOptions()
-	opts.RepairInterval = 0
-	crdt, err := dscrdt.New(
-		batching,
-		datastore.NewKey(crdtNs),
-		ipfs,
-		nil,
-		opts,
-	)
-	checkErr("creating crdt node", err)
-	return crdt
+	return nil
 }
+
+// Get a state manager and the datastore

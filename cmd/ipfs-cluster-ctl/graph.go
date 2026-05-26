@@ -2,9 +2,7 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"io"
-	"sort"
 
 	dot "github.com/ipfs-cluster/go-dot"
 	peer "github.com/libp2p/go-libp2p/core/peer"
@@ -41,38 +39,14 @@ const (
 var errUnknownNodeType = errors.New("unsupported node type. Expected cluster or ipfs")
 
 func makeDot(cg api.ConnectGraph, w io.Writer, allIpfs bool) error {
-	ipfsEdges := make(map[string][]peer.ID)
-	for k, v := range cg.IPFSLinks {
-		ipfsEdges[k] = make([]peer.ID, 0)
-		for _, id := range v {
-			strPid := id.String()
-			if _, ok := cg.IPFSLinks[strPid]; ok || allIpfs {
-				ipfsEdges[k] = append(ipfsEdges[k], id)
-			}
-			if allIpfs { // include all swarm peers in the graph
-				if _, ok := ipfsEdges[strPid]; !ok {
-					// if id in IPFSLinks this will be overwritten
-					// if id not in IPFSLinks this will stay blank
-					ipfsEdges[strPid] = make([]peer.ID, 0)
-				}
-			}
-		}
-	}
-
-	dW := dotWriter{
-		w:                w,
-		dotGraph:         dot.NewGraph("cluster"),
-		self:             cg.ClusterID.String(),
-		trustMap:         cg.ClusterTrustLinks,
-		idToPeername:     cg.IDtoPeername,
-		ipfsEdges:        ipfsEdges,
-		clusterEdges:     cg.ClusterLinks,
-		clusterIpfsEdges: cg.ClustertoIPFS,
-		clusterNodes:     make(map[string]*dot.VertexDescription),
-		ipfsNodes:        make(map[string]*dot.VertexDescription),
-	}
-	return dW.print()
+	_ = "STUB: not implemented"
+	return nil
 }
+
+// include all swarm peers in the graph
+
+// if id in IPFSLinks this will be overwritten
+// if id not in IPFSLinks this will stay blank
 
 type dotWriter struct {
 	clusterNodes map[string]*dot.VertexDescription
@@ -89,177 +63,28 @@ type dotWriter struct {
 	clusterIpfsEdges map[string]peer.ID
 }
 
-func (dW *dotWriter) addSubGraph(sGraph dot.Graph, rank string) {
-	sGraph.IsSubGraph = true
-	sGraph.Rank = rank
-	dW.dotGraph.AddSubGraph(&sGraph)
-}
+func (dW *dotWriter) addSubGraph(sGraph dot.Graph, rank string) { _ = "STUB: not implemented"; return }
 
 // writes nodes to dot file output and creates and stores an ordering over nodes
 func (dW *dotWriter) addNode(graph *dot.Graph, id string, nT nodeType) error {
-	node := dot.NewVertexDescription("")
-	node.Group = id
-	node.ColorScheme = "x11"
-	node.FontName = "Arial"
-	node.Style = "filled"
-	node.FontColor = "black"
-	switch nT {
-	case tSelfCluster:
-		node.ID = fmt.Sprintf("C%d", len(dW.clusterNodes))
-		node.Shape = "box3d"
-		node.Label = label(dW.idToPeername[id], shorten(id))
-		node.Color = "orange"
-		node.Peripheries = 2
-		dW.clusterNodes[id] = &node
-	case tTrustedCluster:
-		node.ID = fmt.Sprintf("T%d", len(dW.clusterNodes))
-		node.Shape = "box3d"
-		node.Label = label(dW.idToPeername[id], shorten(id))
-		node.Color = "orange"
-		dW.clusterNodes[id] = &node
-	case tCluster:
-		node.Shape = "box3d"
-		node.Label = label(dW.idToPeername[id], shorten(id))
-		node.ID = fmt.Sprintf("C%d", len(dW.clusterNodes))
-		node.Color = "darkorange3"
-		dW.clusterNodes[id] = &node
-	case tIPFS:
-		node.ID = fmt.Sprintf("I%d", len(dW.ipfsNodes))
-		node.Shape = "cylinder"
-		node.Label = label("IPFS", shorten(id))
-		node.Color = "turquoise3"
-		dW.ipfsNodes[id] = &node
-	case tIPFSMissing:
-		node.ID = fmt.Sprintf("I%d", len(dW.ipfsNodes))
-		node.Shape = "cylinder"
-		node.Label = label("IPFS", "Errored")
-		node.Color = "firebrick1"
-		dW.ipfsNodes[id] = &node
-	default:
-		return errUnknownNodeType
-	}
-
-	graph.AddVertex(&node)
+	_ = "STUB: not implemented"
 	return nil
 }
 
-func shorten(id string) string {
-	return id[:2] + "*" + id[len(id)-6:]
-}
+func shorten(id string) string { _ = "STUB: not implemented"; return "" }
 
-func label(peername, id string) string {
-	return fmt.Sprintf("< <B> %s </B> <BR/> <B> %s </B> >", peername, id)
-}
+func label(peername, id string) string { _ = "STUB: not implemented"; return "" }
 
-func (dW *dotWriter) print() error {
-	dW.dotGraph.AddComment("The nodes of the connectivity graph")
-	dW.dotGraph.AddComment("The cluster-service peers")
-	// Write cluster nodes, use sorted order for consistent labels
-	sGraphCluster := dot.NewGraph("")
-	sGraphCluster.IsSubGraph = true
-	sortedClusterEdges := sortedKeys(dW.clusterEdges)
-	for _, k := range sortedClusterEdges {
-		var err error
-		if k == dW.self {
-			err = dW.addNode(&sGraphCluster, k, tSelfCluster)
-		} else if dW.trustMap[k] {
-			err = dW.addNode(&sGraphCluster, k, tTrustedCluster)
-		} else {
-			err = dW.addNode(&sGraphCluster, k, tCluster)
-		}
-		if err != nil {
-			return err
-		}
-	}
-	dW.addSubGraph(sGraphCluster, "min")
-	dW.dotGraph.AddNewLine()
+func (dW *dotWriter) print() error { _ = "STUB: not implemented"; return nil }
 
-	dW.dotGraph.AddComment("The ipfs peers")
-	sGraphIPFS := dot.NewGraph("")
-	sGraphIPFS.IsSubGraph = true
-	// Write ipfs nodes, use sorted order for consistent labels
-	for _, k := range sortedKeys(dW.ipfsEdges) {
-		err := dW.addNode(&sGraphIPFS, k, tIPFS)
-		if err != nil {
-			return err
-		}
-	}
+// Write cluster nodes, use sorted order for consistent labels
 
-	for _, k := range sortedClusterEdges {
-		if _, ok := dW.clusterIpfsEdges[k]; !ok {
-			err := dW.addNode(&sGraphIPFS, k, tIPFSMissing)
-			if err != nil {
-				return err
-			}
-		}
-	}
+// Write ipfs nodes, use sorted order for consistent labels
 
-	dW.addSubGraph(sGraphIPFS, "max")
-	dW.dotGraph.AddNewLine()
+// Write cluster edges
 
-	dW.dotGraph.AddComment("Edges representing active connections in the cluster")
-	dW.dotGraph.AddComment("The connections among cluster-service peers")
-	// Write cluster edges
-	for _, k := range sortedClusterEdges {
-		v := dW.clusterEdges[k]
-		for _, id := range v {
-			toNode := dW.clusterNodes[k]
-			fromNode := dW.clusterNodes[id.String()]
-			dW.dotGraph.AddEdge(toNode, fromNode, true, "")
-		}
-	}
-	dW.dotGraph.AddNewLine()
+// Write cluster to ipfs edges
 
-	dW.dotGraph.AddComment("The connections between cluster peers and their ipfs daemons")
-	// Write cluster to ipfs edges
-	for _, k := range sortedClusterEdges {
-		var fromNode *dot.VertexDescription
-		toNode := dW.clusterNodes[k]
-		ipfsID, ok := dW.clusterIpfsEdges[k]
-		if !ok {
-			fromNode, ok2 := dW.ipfsNodes[k]
-			if !ok2 {
-				logger.Error("expected a node at this id")
-				continue
-			}
-			dW.dotGraph.AddEdge(toNode, fromNode, true, "dotted")
-			continue
-		}
+// Write ipfs edges
 
-		fromNode, ok = dW.ipfsNodes[ipfsID.String()]
-		if !ok {
-			logger.Error("expected a node at this id")
-			continue
-		}
-		dW.dotGraph.AddEdge(toNode, fromNode, true, "")
-	}
-	dW.dotGraph.AddNewLine()
-
-	dW.dotGraph.AddComment("The swarm peer connections among ipfs daemons in the cluster")
-	// Write ipfs edges
-	for _, k := range sortedKeys(dW.ipfsEdges) {
-		v := dW.ipfsEdges[k]
-		toNode := dW.ipfsNodes[k]
-		for _, id := range v {
-			idStr := id.String()
-			fromNode, ok := dW.ipfsNodes[idStr]
-			if !ok {
-				logger.Error("expected a node here")
-				continue
-			}
-			dW.dotGraph.AddEdge(toNode, fromNode, true, "")
-		}
-	}
-	return dW.dotGraph.Write(dW.w)
-}
-
-func sortedKeys(dict map[string][]peer.ID) []string {
-	keys := make([]string, len(dict))
-	i := 0
-	for k := range dict {
-		keys[i] = k
-		i++
-	}
-	sort.Strings(keys)
-	return keys
-}
+func sortedKeys(dict map[string][]peer.ID) []string { _ = "STUB: not implemented"; return nil }

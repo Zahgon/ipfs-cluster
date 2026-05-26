@@ -4,10 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	ma "github.com/multiformats/go-multiaddr"
-
 	"github.com/ipfs-cluster/ipfs-cluster/api/common"
-	"github.com/ipfs-cluster/ipfs-cluster/api/pinsvcapi/pinsvc"
 )
 
 const configKey = "pinsvcapi"
@@ -58,74 +55,30 @@ type Config struct {
 
 // NewConfig creates a Config object setting the necessary meta-fields in the
 // common.Config embedded object.
-func NewConfig() *Config {
-	cfg := Config{}
-	cfg.Config.ConfigKey = configKey
-	cfg.EnvConfigKey = envConfigKey
-	cfg.Logger = logger
-	cfg.RequestLogger = apiLogger
-	cfg.DefaultFunc = defaultFunc
-	cfg.APIErrorFunc = func(err error, status int) error {
-		return pinsvc.APIError{
-			Details: pinsvc.APIErrorDetails{
-				Reason: err.Error(),
-			},
-		}
-	}
-	return &cfg
-}
+func NewConfig() *Config { _ = "STUB: not implemented"; return nil }
 
 // ConfigKey returns a human-friendly identifier for this type of
 // Config.
 func (cfg *Config) ConfigKey() string {
-	return configKey
+	_ = "STUB: not implemented"
+
+	// Default initializes this Config with working values.
+	return ""
 }
 
-// Default initializes this Config with working values.
-func (cfg *Config) Default() error {
-	return defaultFunc(&cfg.Config)
-}
+func (cfg *Config) Default() error { _ = "STUB: not implemented"; return nil }
 
 // Sets all defaults for this config.
 func defaultFunc(cfg *common.Config) error {
+	_ = "STUB: not implemented"
 	// http
-	addrs := make([]ma.Multiaddr, 0, len(DefaultHTTPListenAddrs))
-	for _, def := range DefaultHTTPListenAddrs {
-		httpListen, err := ma.NewMultiaddr(def)
-		if err != nil {
-			return err
-		}
-		addrs = append(addrs, httpListen)
-	}
-	cfg.HTTPListenAddr = addrs
-	cfg.PathSSLCertFile = ""
-	cfg.PathSSLKeyFile = ""
-	cfg.ReadTimeout = DefaultReadTimeout
-	cfg.ReadHeaderTimeout = DefaultReadHeaderTimeout
-	cfg.WriteTimeout = DefaultWriteTimeout
-	cfg.IdleTimeout = DefaultIdleTimeout
-	cfg.MaxHeaderBytes = DefaultMaxHeaderBytes
-
-	// libp2p
-	cfg.ID = ""
-	cfg.PrivateKey = nil
-	cfg.Libp2pListenAddr = nil
-
-	// Auth
-	cfg.BasicAuthCredentials = nil
-
-	// Logs
-	cfg.HTTPLogFile = ""
-
-	// Headers
-	cfg.Headers = DefaultHeaders
-
-	cfg.CORSAllowedOrigins = DefaultCORSAllowedOrigins
-	cfg.CORSAllowedMethods = DefaultCORSAllowedMethods
-	cfg.CORSAllowedHeaders = DefaultCORSAllowedHeaders
-	cfg.CORSExposedHeaders = DefaultCORSExposedHeaders
-	cfg.CORSAllowCredentials = DefaultCORSAllowCredentials
-	cfg.CORSMaxAge = DefaultCORSMaxAge
-
 	return nil
 }
+
+// libp2p
+
+// Auth
+
+// Logs
+
+// Headers

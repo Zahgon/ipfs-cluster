@@ -4,8 +4,6 @@ package rpcutil
 
 import (
 	"context"
-	"errors"
-	"fmt"
 	"time"
 
 	"github.com/ipfs-cluster/ipfs-cluster/api"
@@ -18,15 +16,8 @@ func CtxsWithTimeout(
 	n int,
 	timeout time.Duration,
 ) ([]context.Context, []context.CancelFunc) {
-
-	ctxs := make([]context.Context, n)
-	cancels := make([]context.CancelFunc, n)
-	for i := 0; i < n; i++ {
-		ctx, cancel := context.WithTimeout(parent, timeout)
-		ctxs[i] = ctx
-		cancels[i] = cancel
-	}
-	return ctxs, cancels
+	_ = "STUB: not implemented"
+	return nil, nil
 }
 
 // CtxsWithCancel returns n cancellable contexts, derived from the given parent.
@@ -34,24 +25,13 @@ func CtxsWithCancel(
 	parent context.Context,
 	n int,
 ) ([]context.Context, []context.CancelFunc) {
-
-	ctxs := make([]context.Context, n)
-	cancels := make([]context.CancelFunc, n)
-	for i := 0; i < n; i++ {
-		ctx, cancel := context.WithCancel(parent)
-		ctxs[i] = ctx
-		cancels[i] = cancel
-	}
-	return ctxs, cancels
+	_ = "STUB: not implemented"
+	return nil, nil
 }
 
 // MultiCancel calls all the provided CancelFuncs. It
 // is useful with "defer Multicancel()"
-func MultiCancel(cancels []context.CancelFunc) {
-	for _, cancel := range cancels {
-		cancel()
-	}
-}
+func MultiCancel(cancels []context.CancelFunc) { _ = "STUB: not implemented"; return }
 
 // The copy functions below are used in calls to Cluster.multiRPC()
 
@@ -69,94 +49,42 @@ func MultiCancel(cancels []context.CancelFunc) {
 // CopyIDsToIfaces converts an api.ID slice to an empty interface
 // slice using pointers to each elements of the original slice.
 // Useful to handle gorpc.MultiCall() replies.
-func CopyIDsToIfaces(in []api.ID) []interface{} {
-	ifaces := make([]interface{}, len(in))
-	for i := range in {
-		in[i] = api.ID{}
-		ifaces[i] = &(in[i])
-	}
-	return ifaces
-}
+func CopyIDsToIfaces(in []api.ID) []interface{} { _ = "STUB: not implemented"; return nil }
 
 // CopyIDSliceToIfaces converts an api.ID slice of slices
 // to an empty interface slice using pointers to each elements of the
 // original slice. Useful to handle gorpc.MultiCall() replies.
-func CopyIDSliceToIfaces(in [][]api.ID) []interface{} {
-	ifaces := make([]interface{}, len(in))
-	for i := range in {
-		ifaces[i] = &(in[i])
-	}
-	return ifaces
-}
+func CopyIDSliceToIfaces(in [][]api.ID) []interface{} { _ = "STUB: not implemented"; return nil }
 
 // CopyPinInfoToIfaces converts an api.PinInfo slice to
 // an empty interface slice using pointers to each elements of
 // the original slice. Useful to handle gorpc.MultiCall() replies.
-func CopyPinInfoToIfaces(in []api.PinInfo) []interface{} {
-	ifaces := make([]interface{}, len(in))
-	for i := range in {
-		in[i] = api.PinInfo{}
-		ifaces[i] = &(in[i])
-	}
-	return ifaces
-}
+func CopyPinInfoToIfaces(in []api.PinInfo) []interface{} { _ = "STUB: not implemented"; return nil }
 
 // CopyPinInfoSliceToIfaces converts an api.PinInfo slice of slices
 // to an empty interface slice using pointers to each elements of the original
 // slice. Useful to handle gorpc.MultiCall() replies.
 func CopyPinInfoSliceToIfaces(in [][]api.PinInfo) []interface{} {
-	ifaces := make([]interface{}, len(in))
-	for i := range in {
-		ifaces[i] = &(in[i])
-	}
-	return ifaces
+	_ = "STUB: not implemented"
+	return nil
 }
 
 // CopyRepoGCSliceToIfaces converts an api.RepoGC slice to
 // an empty interface slice using pointers to each elements of
 // the original slice. Useful to handle gorpc.MultiCall() replies.
-func CopyRepoGCSliceToIfaces(in []api.RepoGC) []interface{} {
-	ifaces := make([]interface{}, len(in))
-	for i := range in {
-		in[i] = api.RepoGC{}
-		ifaces[i] = &(in[i])
-	}
-	return ifaces
-}
+func CopyRepoGCSliceToIfaces(in []api.RepoGC) []interface{} { _ = "STUB: not implemented"; return nil }
 
 // CopyEmptyStructToIfaces converts an empty struct slice to an empty interface
 // slice using pointers to each elements of the original slice.
 // Useful to handle gorpc.MultiCall() replies.
-func CopyEmptyStructToIfaces(in []struct{}) []interface{} {
-	ifaces := make([]interface{}, len(in))
-	for i := range in {
-		ifaces[i] = &(in[i])
-	}
-	return ifaces
-}
+func CopyEmptyStructToIfaces(in []struct{}) []interface{} { _ = "STUB: not implemented"; return nil }
 
 // RPCDiscardReplies returns a []interface{} slice made from a []struct{}
 // slice of then given length. Useful for RPC methods which have no response
 // types (so they use empty structs).
-func RPCDiscardReplies(n int) []interface{} {
-	replies := make([]struct{}, n)
-	return CopyEmptyStructToIfaces(replies)
-}
+func RPCDiscardReplies(n int) []interface{} { _ = "STUB: not implemented"; return nil }
 
 // CheckErrs returns nil if all the errors in a slice are nil, otherwise
 // it returns a single error formed by joining the error messages existing
 // in the slice with a line-break.
-func CheckErrs(errs []error) error {
-	errMsg := ""
-
-	for _, e := range errs {
-		if e != nil {
-			errMsg += fmt.Sprintf("%s\n", e.Error())
-		}
-	}
-
-	if len(errMsg) > 0 {
-		return errors.New(errMsg)
-	}
-	return nil
-}
+func CheckErrs(errs []error) error { _ = "STUB: not implemented"; return nil }

@@ -1,15 +1,10 @@
 package badger3
 
 import (
-	"encoding/json"
-	"errors"
-	"path/filepath"
 	"time"
 
-	"dario.cat/mergo"
 	"github.com/dgraph-io/badger/v3"
 	"github.com/dgraph-io/badger/v3/options"
-	"github.com/kelseyhightower/envconfig"
 
 	"github.com/ipfs-cluster/ipfs-cluster/config"
 )
@@ -137,98 +132,9 @@ type badgerOptions struct {
 	NamespaceOffset int `json:"namespace_offset"`
 }
 
-func (bo *badgerOptions) Unmarshal() *badger.Options {
-	badgerOpts := &badger.Options{}
-	badgerOpts.Dir = bo.Dir
-	badgerOpts.ValueDir = bo.ValueDir
-	badgerOpts.SyncWrites = bo.SyncWrites
-	badgerOpts.NumVersionsToKeep = bo.NumVersionsToKeep
-	badgerOpts.ReadOnly = bo.ReadOnly
-	badgerOpts.Compression = bo.Compression
-	badgerOpts.InMemory = bo.InMemory
-	badgerOpts.MetricsEnabled = bo.MetricsEnabled
-	badgerOpts.NumGoroutines = bo.NumGoroutines
+func (bo *badgerOptions) Unmarshal() *badger.Options { _ = "STUB: not implemented"; return nil }
 
-	badgerOpts.MemTableSize = bo.MemTableSize
-	badgerOpts.BaseTableSize = bo.BaseTableSize
-	badgerOpts.BaseLevelSize = bo.BaseLevelSize
-	badgerOpts.LevelSizeMultiplier = bo.LevelSizeMultiplier
-	badgerOpts.TableSizeMultiplier = bo.TableSizeMultiplier
-	badgerOpts.MaxLevels = bo.MaxLevels
-
-	badgerOpts.VLogPercentile = bo.VLogPercentile
-	badgerOpts.ValueThreshold = bo.ValueThreshold
-	badgerOpts.NumMemtables = bo.NumMemtables
-	badgerOpts.BlockSize = bo.BlockSize
-	badgerOpts.BloomFalsePositive = bo.BloomFalsePositive
-	badgerOpts.BlockCacheSize = bo.BlockCacheSize
-	badgerOpts.IndexCacheSize = bo.IndexCacheSize
-
-	badgerOpts.NumLevelZeroTables = bo.NumLevelZeroTables
-	badgerOpts.NumLevelZeroTablesStall = bo.NumLevelZeroTablesStall
-
-	badgerOpts.ValueLogFileSize = bo.ValueLogFileSize
-	badgerOpts.ValueLogMaxEntries = bo.ValueLogMaxEntries
-
-	badgerOpts.NumCompactors = bo.NumCompactors
-	badgerOpts.CompactL0OnClose = bo.CompactL0OnClose
-	badgerOpts.LmaxCompaction = bo.LmaxCompaction
-	badgerOpts.ZSTDCompressionLevel = bo.ZSTDCompressionLevel
-
-	badgerOpts.VerifyValueChecksum = bo.VerifyValueChecksum
-
-	badgerOpts.ChecksumVerificationMode = bo.ChecksumVerificationMode
-	badgerOpts.DetectConflicts = bo.DetectConflicts
-
-	badgerOpts.NamespaceOffset = bo.NamespaceOffset
-
-	return badgerOpts
-}
-
-func (bo *badgerOptions) Marshal(badgerOpts *badger.Options) {
-	bo.Dir = badgerOpts.Dir
-	bo.ValueDir = badgerOpts.ValueDir
-	bo.SyncWrites = badgerOpts.SyncWrites
-	bo.NumVersionsToKeep = badgerOpts.NumVersionsToKeep
-	bo.ReadOnly = badgerOpts.ReadOnly
-	bo.Compression = badgerOpts.Compression
-	bo.InMemory = badgerOpts.InMemory
-	bo.MetricsEnabled = badgerOpts.MetricsEnabled
-	bo.NumGoroutines = badgerOpts.NumGoroutines
-
-	bo.MemTableSize = badgerOpts.MemTableSize
-	bo.BaseTableSize = badgerOpts.BaseTableSize
-	bo.BaseLevelSize = badgerOpts.BaseLevelSize
-	bo.LevelSizeMultiplier = badgerOpts.LevelSizeMultiplier
-	bo.TableSizeMultiplier = badgerOpts.TableSizeMultiplier
-	bo.MaxLevels = badgerOpts.MaxLevels
-
-	bo.VLogPercentile = badgerOpts.VLogPercentile
-	bo.ValueThreshold = badgerOpts.ValueThreshold
-	bo.NumMemtables = badgerOpts.NumMemtables
-	bo.BlockSize = badgerOpts.BlockSize
-	bo.BloomFalsePositive = badgerOpts.BloomFalsePositive
-	bo.BlockCacheSize = badgerOpts.BlockCacheSize
-	bo.IndexCacheSize = badgerOpts.IndexCacheSize
-
-	bo.NumLevelZeroTables = badgerOpts.NumLevelZeroTables
-	bo.NumLevelZeroTablesStall = badgerOpts.NumLevelZeroTablesStall
-
-	bo.ValueLogFileSize = badgerOpts.ValueLogFileSize
-	bo.ValueLogMaxEntries = badgerOpts.ValueLogMaxEntries
-
-	bo.NumCompactors = badgerOpts.NumCompactors
-	bo.CompactL0OnClose = badgerOpts.CompactL0OnClose
-	bo.LmaxCompaction = badgerOpts.LmaxCompaction
-	bo.ZSTDCompressionLevel = badgerOpts.ZSTDCompressionLevel
-
-	bo.VerifyValueChecksum = badgerOpts.VerifyValueChecksum
-
-	bo.ChecksumVerificationMode = badgerOpts.ChecksumVerificationMode
-	bo.DetectConflicts = badgerOpts.DetectConflicts
-
-	bo.NamespaceOffset = badgerOpts.NamespaceOffset
-}
+func (bo *badgerOptions) Marshal(badgerOpts *badger.Options) { _ = "STUB: not implemented"; return }
 
 type jsonConfig struct {
 	Folder         string        `json:"folder,omitempty"`
@@ -240,121 +146,40 @@ type jsonConfig struct {
 
 // ConfigKey returns a human-friendly identifier for this type of Datastore.
 func (cfg *Config) ConfigKey() string {
-	return configKey
+	_ = "STUB: not implemented"
+
+	// Default initializes this Config with sensible values.
+	return ""
 }
 
-// Default initializes this Config with sensible values.
-func (cfg *Config) Default() error {
-	cfg.Folder = DefaultSubFolder
-	cfg.GCDiscardRatio = DefaultGCDiscardRatio
-	cfg.GCInterval = DefaultGCInterval
-	cfg.GCSleep = DefaultGCSleep
-	cfg.BadgerOptions = DefaultBadgerOptions
-	cfg.BadgerOptions.Logger = logger
-	return nil
-}
+func (cfg *Config) Default() error { _ = "STUB: not implemented"; return nil }
 
 // ApplyEnvVars fills in any Config fields found as environment variables.
-func (cfg *Config) ApplyEnvVars() error {
-	jcfg := cfg.toJSONConfig()
-
-	err := envconfig.Process(envConfigKey, jcfg)
-	if err != nil {
-		return err
-	}
-
-	return cfg.applyJSONConfig(jcfg)
-}
+func (cfg *Config) ApplyEnvVars() error { _ = "STUB: not implemented"; return nil }
 
 // Validate checks that the fields of this Config have working values,
 // at least in appearance.
-func (cfg *Config) Validate() error {
-	if cfg.Folder == "" {
-		return errors.New("folder is unset")
-	}
-
-	if cfg.GCDiscardRatio <= 0 || cfg.GCDiscardRatio >= 1 {
-		return errors.New("gc_discard_ratio must be more than 0 and less than 1")
-	}
-
-	return nil
-}
+func (cfg *Config) Validate() error { _ = "STUB: not implemented"; return nil }
 
 // LoadJSON reads the fields of this Config from a JSON byteslice as
 // generated by ToJSON.
-func (cfg *Config) LoadJSON(raw []byte) error {
-	jcfg := &jsonConfig{}
-	err := json.Unmarshal(raw, jcfg)
-	if err != nil {
-		return err
-	}
-	cfg.Default()
+func (cfg *Config) LoadJSON(raw []byte) error { _ = "STUB: not implemented"; return nil }
 
-	return cfg.applyJSONConfig(jcfg)
-}
+func (cfg *Config) applyJSONConfig(jcfg *jsonConfig) error { _ = "STUB: not implemented"; return nil }
 
-func (cfg *Config) applyJSONConfig(jcfg *jsonConfig) error {
-	config.SetIfNotDefault(jcfg.Folder, &cfg.Folder)
+// 0 is an invalid option anyways. In that case, set default (0.2)
 
-	// 0 is an invalid option anyways. In that case, set default (0.2)
-	config.SetIfNotDefault(jcfg.GCDiscardRatio, &cfg.GCDiscardRatio)
-
-	// If these durations are set, GC is enabled by default with default
-	// values.
-	err := config.ParseDurations("badger",
-		&config.DurationOpt{Duration: jcfg.GCInterval, Dst: &cfg.GCInterval, Name: "gc_interval"},
-		&config.DurationOpt{Duration: jcfg.GCSleep, Dst: &cfg.GCSleep, Name: "gc_sleep"},
-	)
-	if err != nil {
-		return err
-	}
-
-	badgerOpts := jcfg.BadgerOptions.Unmarshal()
-
-	if err := mergo.Merge(&cfg.BadgerOptions, badgerOpts, mergo.WithOverride); err != nil {
-		return err
-	}
-
-	return cfg.Validate()
-}
+// If these durations are set, GC is enabled by default with default
+// values.
 
 // ToJSON generates a JSON-formatted human-friendly representation of this
 // Config.
-func (cfg *Config) ToJSON() (raw []byte, err error) {
-	jcfg := cfg.toJSONConfig()
+func (cfg *Config) ToJSON() (raw []byte, err error) { _ = "STUB: not implemented"; return nil, nil }
 
-	raw, err = config.DefaultJSONMarshal(jcfg)
-	return
-}
-
-func (cfg *Config) toJSONConfig() *jsonConfig {
-	jCfg := &jsonConfig{}
-
-	if cfg.Folder != DefaultSubFolder {
-		jCfg.Folder = cfg.Folder
-	}
-
-	jCfg.GCDiscardRatio = cfg.GCDiscardRatio
-	jCfg.GCInterval = cfg.GCInterval.String()
-	jCfg.GCSleep = cfg.GCSleep.String()
-
-	bo := &badgerOptions{}
-	bo.Marshal(&cfg.BadgerOptions)
-	jCfg.BadgerOptions = *bo
-
-	return jCfg
-}
+func (cfg *Config) toJSONConfig() *jsonConfig { _ = "STUB: not implemented"; return nil }
 
 // GetFolder returns the BadgerDB folder.
-func (cfg *Config) GetFolder() string {
-	if filepath.IsAbs(cfg.Folder) {
-		return cfg.Folder
-	}
-
-	return filepath.Join(cfg.BaseDir, cfg.Folder)
-}
+func (cfg *Config) GetFolder() string { _ = "STUB: not implemented"; return "" }
 
 // ToDisplayJSON returns JSON config as a string.
-func (cfg *Config) ToDisplayJSON() ([]byte, error) {
-	return config.DisplayJSON(cfg.toJSONConfig())
-}
+func (cfg *Config) ToDisplayJSON() ([]byte, error) { _ = "STUB: not implemented"; return nil, nil }

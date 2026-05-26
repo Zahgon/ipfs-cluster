@@ -7,10 +7,10 @@
 package pb
 
 import (
+	sync "sync"
+
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	reflect "reflect"
-	sync "sync"
 )
 
 const (
@@ -48,32 +48,27 @@ var (
 	}
 )
 
-func (x Pin_PinType) Enum() *Pin_PinType {
-	p := new(Pin_PinType)
-	*p = x
-	return p
-}
+func (x Pin_PinType) Enum() *Pin_PinType { _ = "STUB: not implemented"; return nil }
 
-func (x Pin_PinType) String() string {
-	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
-}
+func (x Pin_PinType) String() string { _ = "STUB: not implemented"; return "" }
 
 func (Pin_PinType) Descriptor() protoreflect.EnumDescriptor {
-	return file_types_proto_enumTypes[0].Descriptor()
+	_ = "STUB: not implemented"
+	return *new(protoreflect.EnumDescriptor)
 }
 
 func (Pin_PinType) Type() protoreflect.EnumType {
-	return &file_types_proto_enumTypes[0]
+	_ = "STUB: not implemented"
+	return *new(protoreflect.EnumType)
 }
 
 func (x Pin_PinType) Number() protoreflect.EnumNumber {
-	return protoreflect.EnumNumber(x)
+	_ = "STUB: not implemented"
+	return *new(protoreflect.EnumNumber)
 }
 
 // Deprecated: Use Pin_PinType.Descriptor instead.
-func (Pin_PinType) EnumDescriptor() ([]byte, []int) {
-	return file_types_proto_rawDescGZIP(), []int{0, 0}
-}
+func (Pin_PinType) EnumDescriptor() ([]byte, []int) { _ = "STUB: not implemented"; return nil, nil }
 
 type Pin struct {
 	state         protoimpl.MessageState
@@ -89,84 +84,33 @@ type Pin struct {
 	Timestamp   uint64      `protobuf:"varint,7,opt,name=Timestamp,proto3" json:"Timestamp,omitempty"`
 }
 
-func (x *Pin) Reset() {
-	*x = Pin{}
-	mi := &file_types_proto_msgTypes[0]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
+func (x *Pin) Reset() { _ = "STUB: not implemented"; return }
 
-func (x *Pin) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
+func (x *Pin) String() string { _ = "STUB: not implemented"; return "" }
 
-func (*Pin) ProtoMessage() {}
+func (*Pin) ProtoMessage() { _ = "STUB: not implemented"; return }
 
 func (x *Pin) ProtoReflect() protoreflect.Message {
-	mi := &file_types_proto_msgTypes[0]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
+	_ = "STUB: not implemented"
+	return *new(protoreflect.Message)
 }
 
 // Deprecated: Use Pin.ProtoReflect.Descriptor instead.
-func (*Pin) Descriptor() ([]byte, []int) {
-	return file_types_proto_rawDescGZIP(), []int{0}
-}
+func (*Pin) Descriptor() ([]byte, []int) { _ = "STUB: not implemented"; return nil, nil }
 
-func (x *Pin) GetCid() []byte {
-	if x != nil {
-		return x.Cid
-	}
-	return nil
-}
+func (x *Pin) GetCid() []byte { _ = "STUB: not implemented"; return nil }
 
-func (x *Pin) GetType() Pin_PinType {
-	if x != nil {
-		return x.Type
-	}
-	return Pin_BadType
-}
+func (x *Pin) GetType() Pin_PinType { _ = "STUB: not implemented"; return *new(Pin_PinType) }
 
-func (x *Pin) GetAllocations() [][]byte {
-	if x != nil {
-		return x.Allocations
-	}
-	return nil
-}
+func (x *Pin) GetAllocations() [][]byte { _ = "STUB: not implemented"; return nil }
 
-func (x *Pin) GetMaxDepth() int32 {
-	if x != nil {
-		return x.MaxDepth
-	}
-	return 0
-}
+func (x *Pin) GetMaxDepth() int32 { _ = "STUB: not implemented"; return 0 }
 
-func (x *Pin) GetReference() []byte {
-	if x != nil {
-		return x.Reference
-	}
-	return nil
-}
+func (x *Pin) GetReference() []byte { _ = "STUB: not implemented"; return nil }
 
-func (x *Pin) GetOptions() *PinOptions {
-	if x != nil {
-		return x.Options
-	}
-	return nil
-}
+func (x *Pin) GetOptions() *PinOptions { _ = "STUB: not implemented"; return nil }
 
-func (x *Pin) GetTimestamp() uint64 {
-	if x != nil {
-		return x.Timestamp
-	}
-	return 0
-}
+func (x *Pin) GetTimestamp() uint64 { _ = "STUB: not implemented"; return 0 }
 
 type PinOptions struct {
 	state         protoimpl.MessageState
@@ -185,99 +129,38 @@ type PinOptions struct {
 	SortedMetadata []*Metadata       `protobuf:"bytes,10,rep,name=SortedMetadata,proto3" json:"SortedMetadata,omitempty"`
 }
 
-func (x *PinOptions) Reset() {
-	*x = PinOptions{}
-	mi := &file_types_proto_msgTypes[1]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
+func (x *PinOptions) Reset() { _ = "STUB: not implemented"; return }
 
-func (x *PinOptions) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
+func (x *PinOptions) String() string { _ = "STUB: not implemented"; return "" }
 
-func (*PinOptions) ProtoMessage() {}
+func (*PinOptions) ProtoMessage() { _ = "STUB: not implemented"; return }
 
 func (x *PinOptions) ProtoReflect() protoreflect.Message {
-	mi := &file_types_proto_msgTypes[1]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
+	_ = "STUB: not implemented"
+	return *new(protoreflect.Message)
 }
 
 // Deprecated: Use PinOptions.ProtoReflect.Descriptor instead.
-func (*PinOptions) Descriptor() ([]byte, []int) {
-	return file_types_proto_rawDescGZIP(), []int{1}
-}
+func (*PinOptions) Descriptor() ([]byte, []int) { _ = "STUB: not implemented"; return nil, nil }
 
-func (x *PinOptions) GetReplicationFactorMin() int32 {
-	if x != nil {
-		return x.ReplicationFactorMin
-	}
-	return 0
-}
+func (x *PinOptions) GetReplicationFactorMin() int32 { _ = "STUB: not implemented"; return 0 }
 
-func (x *PinOptions) GetReplicationFactorMax() int32 {
-	if x != nil {
-		return x.ReplicationFactorMax
-	}
-	return 0
-}
+func (x *PinOptions) GetReplicationFactorMax() int32 { _ = "STUB: not implemented"; return 0 }
 
-func (x *PinOptions) GetName() string {
-	if x != nil {
-		return x.Name
-	}
-	return ""
-}
+func (x *PinOptions) GetName() string { _ = "STUB: not implemented"; return "" }
 
-func (x *PinOptions) GetShardSize() uint64 {
-	if x != nil {
-		return x.ShardSize
-	}
-	return 0
-}
+func (x *PinOptions) GetShardSize() uint64 { _ = "STUB: not implemented"; return 0 }
 
 // Deprecated: Marked as deprecated in types.proto.
-func (x *PinOptions) GetMetadata() map[string]string {
-	if x != nil {
-		return x.Metadata
-	}
-	return nil
-}
+func (x *PinOptions) GetMetadata() map[string]string { _ = "STUB: not implemented"; return nil }
 
-func (x *PinOptions) GetPinUpdate() []byte {
-	if x != nil {
-		return x.PinUpdate
-	}
-	return nil
-}
+func (x *PinOptions) GetPinUpdate() []byte { _ = "STUB: not implemented"; return nil }
 
-func (x *PinOptions) GetExpireAt() uint64 {
-	if x != nil {
-		return x.ExpireAt
-	}
-	return 0
-}
+func (x *PinOptions) GetExpireAt() uint64 { _ = "STUB: not implemented"; return 0 }
 
-func (x *PinOptions) GetOrigins() [][]byte {
-	if x != nil {
-		return x.Origins
-	}
-	return nil
-}
+func (x *PinOptions) GetOrigins() [][]byte { _ = "STUB: not implemented"; return nil }
 
-func (x *PinOptions) GetSortedMetadata() []*Metadata {
-	if x != nil {
-		return x.SortedMetadata
-	}
-	return nil
-}
+func (x *PinOptions) GetSortedMetadata() []*Metadata { _ = "STUB: not implemented"; return nil }
 
 type Metadata struct {
 	state         protoimpl.MessageState
@@ -288,49 +171,23 @@ type Metadata struct {
 	Value string `protobuf:"bytes,2,opt,name=Value,proto3" json:"Value,omitempty"`
 }
 
-func (x *Metadata) Reset() {
-	*x = Metadata{}
-	mi := &file_types_proto_msgTypes[2]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
+func (x *Metadata) Reset() { _ = "STUB: not implemented"; return }
 
-func (x *Metadata) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
+func (x *Metadata) String() string { _ = "STUB: not implemented"; return "" }
 
-func (*Metadata) ProtoMessage() {}
+func (*Metadata) ProtoMessage() { _ = "STUB: not implemented"; return }
 
 func (x *Metadata) ProtoReflect() protoreflect.Message {
-	mi := &file_types_proto_msgTypes[2]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
+	_ = "STUB: not implemented"
+	return *new(protoreflect.Message)
 }
 
 // Deprecated: Use Metadata.ProtoReflect.Descriptor instead.
-func (*Metadata) Descriptor() ([]byte, []int) {
-	return file_types_proto_rawDescGZIP(), []int{2}
-}
+func (*Metadata) Descriptor() ([]byte, []int) { _ = "STUB: not implemented"; return nil, nil }
 
-func (x *Metadata) GetKey() string {
-	if x != nil {
-		return x.Key
-	}
-	return ""
-}
+func (x *Metadata) GetKey() string { _ = "STUB: not implemented"; return "" }
 
-func (x *Metadata) GetValue() string {
-	if x != nil {
-		return x.Value
-	}
-	return ""
-}
+func (x *Metadata) GetValue() string { _ = "STUB: not implemented"; return "" }
 
 var File_types_proto protoreflect.FileDescriptor
 
@@ -396,12 +253,7 @@ var (
 	file_types_proto_rawDescData = file_types_proto_rawDesc
 )
 
-func file_types_proto_rawDescGZIP() []byte {
-	file_types_proto_rawDescOnce.Do(func() {
-		file_types_proto_rawDescData = protoimpl.X.CompressGZIP(file_types_proto_rawDescData)
-	})
-	return file_types_proto_rawDescData
-}
+func file_types_proto_rawDescGZIP() []byte { _ = "STUB: not implemented"; return nil }
 
 var file_types_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
 var file_types_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
@@ -424,28 +276,5 @@ var file_types_proto_depIdxs = []int32{
 	0, // [0:4] is the sub-list for field type_name
 }
 
-func init() { file_types_proto_init() }
-func file_types_proto_init() {
-	if File_types_proto != nil {
-		return
-	}
-	type x struct{}
-	out := protoimpl.TypeBuilder{
-		File: protoimpl.DescBuilder{
-			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: file_types_proto_rawDesc,
-			NumEnums:      1,
-			NumMessages:   4,
-			NumExtensions: 0,
-			NumServices:   0,
-		},
-		GoTypes:           file_types_proto_goTypes,
-		DependencyIndexes: file_types_proto_depIdxs,
-		EnumInfos:         file_types_proto_enumTypes,
-		MessageInfos:      file_types_proto_msgTypes,
-	}.Build()
-	File_types_proto = out.File
-	file_types_proto_rawDesc = nil
-	file_types_proto_goTypes = nil
-	file_types_proto_depIdxs = nil
-}
+func init()                  { file_types_proto_init() }
+func file_types_proto_init() { _ = "STUB: not implemented"; return }

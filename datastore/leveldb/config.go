@@ -1,13 +1,7 @@
 package leveldb
 
 import (
-	"encoding/json"
-	"errors"
-	"path/filepath"
-
-	"dario.cat/mergo"
 	"github.com/ipfs-cluster/ipfs-cluster/config"
-	"github.com/kelseyhightower/envconfig"
 	goleveldb "github.com/syndtr/goleveldb/leveldb/opt"
 )
 
@@ -77,69 +71,9 @@ type levelDBOptions struct {
 	WriteL0SlowdownTrigger                int       `json:"write_l0_slowdown_trigger"`
 }
 
-func (ldbo *levelDBOptions) Unmarshal() *goleveldb.Options {
-	goldbo := &goleveldb.Options{}
-	goldbo.BlockCacheCapacity = ldbo.BlockCacheCapacity
-	goldbo.BlockCacheEvictRemoved = ldbo.BlockCacheEvictRemoved
-	goldbo.BlockRestartInterval = ldbo.BlockRestartInterval
-	goldbo.BlockSize = ldbo.BlockSize
-	goldbo.CompactionExpandLimitFactor = ldbo.CompactionExpandLimitFactor
-	goldbo.CompactionGPOverlapsFactor = ldbo.CompactionGPOverlapsFactor
-	goldbo.CompactionL0Trigger = ldbo.CompactionL0Trigger
-	goldbo.CompactionSourceLimitFactor = ldbo.CompactionSourceLimitFactor
-	goldbo.CompactionTableSize = ldbo.CompactionTableSize
-	goldbo.CompactionTableSizeMultiplier = ldbo.CompactionTableSizeMultiplier
-	goldbo.CompactionTableSizeMultiplierPerLevel = ldbo.CompactionTableSizeMultiplierPerLevel
-	goldbo.CompactionTotalSize = ldbo.CompactionTotalSize
-	goldbo.CompactionTotalSizeMultiplier = ldbo.CompactionTotalSizeMultiplier
-	goldbo.CompactionTotalSizeMultiplierPerLevel = ldbo.CompactionTotalSizeMultiplierPerLevel
-	goldbo.Compression = goleveldb.Compression(ldbo.Compression)
-	goldbo.DisableBufferPool = ldbo.DisableBufferPool
-	goldbo.DisableBlockCache = ldbo.DisableBlockCache
-	goldbo.DisableCompactionBackoff = ldbo.DisableCompactionBackoff
-	goldbo.DisableLargeBatchTransaction = ldbo.DisableLargeBatchTransaction
-	goldbo.IteratorSamplingRate = ldbo.IteratorSamplingRate
-	goldbo.NoSync = ldbo.NoSync
-	goldbo.NoWriteMerge = ldbo.NoWriteMerge
-	goldbo.OpenFilesCacheCapacity = ldbo.OpenFilesCacheCapacity
-	goldbo.ReadOnly = ldbo.ReadOnly
-	goldbo.Strict = goleveldb.Strict(ldbo.Strict)
-	goldbo.WriteBuffer = ldbo.WriteBuffer
-	goldbo.WriteL0PauseTrigger = ldbo.WriteL0PauseTrigger
-	goldbo.WriteL0SlowdownTrigger = ldbo.WriteL0SlowdownTrigger
-	return goldbo
-}
+func (ldbo *levelDBOptions) Unmarshal() *goleveldb.Options { _ = "STUB: not implemented"; return nil }
 
-func (ldbo *levelDBOptions) Marshal(goldbo *goleveldb.Options) {
-	ldbo.BlockCacheCapacity = goldbo.BlockCacheCapacity
-	ldbo.BlockCacheEvictRemoved = goldbo.BlockCacheEvictRemoved
-	ldbo.BlockRestartInterval = goldbo.BlockRestartInterval
-	ldbo.BlockSize = goldbo.BlockSize
-	ldbo.CompactionExpandLimitFactor = goldbo.CompactionExpandLimitFactor
-	ldbo.CompactionGPOverlapsFactor = goldbo.CompactionGPOverlapsFactor
-	ldbo.CompactionL0Trigger = goldbo.CompactionL0Trigger
-	ldbo.CompactionSourceLimitFactor = goldbo.CompactionSourceLimitFactor
-	ldbo.CompactionTableSize = goldbo.CompactionTableSize
-	ldbo.CompactionTableSizeMultiplier = goldbo.CompactionTableSizeMultiplier
-	ldbo.CompactionTableSizeMultiplierPerLevel = goldbo.CompactionTableSizeMultiplierPerLevel
-	ldbo.CompactionTotalSize = goldbo.CompactionTotalSize
-	ldbo.CompactionTotalSizeMultiplier = goldbo.CompactionTotalSizeMultiplier
-	ldbo.CompactionTotalSizeMultiplierPerLevel = goldbo.CompactionTotalSizeMultiplierPerLevel
-	ldbo.Compression = uint(goldbo.Compression)
-	ldbo.DisableBufferPool = goldbo.DisableBufferPool
-	ldbo.DisableBlockCache = goldbo.DisableBlockCache
-	ldbo.DisableCompactionBackoff = goldbo.DisableCompactionBackoff
-	ldbo.DisableLargeBatchTransaction = goldbo.DisableLargeBatchTransaction
-	ldbo.IteratorSamplingRate = goldbo.IteratorSamplingRate
-	ldbo.NoSync = goldbo.NoSync
-	ldbo.NoWriteMerge = goldbo.NoWriteMerge
-	ldbo.OpenFilesCacheCapacity = goldbo.OpenFilesCacheCapacity
-	ldbo.ReadOnly = goldbo.ReadOnly
-	ldbo.Strict = uint(goldbo.Strict)
-	ldbo.WriteBuffer = goldbo.WriteBuffer
-	ldbo.WriteL0PauseTrigger = goldbo.WriteL0PauseTrigger
-	ldbo.WriteL0SlowdownTrigger = goldbo.WriteL0SlowdownTrigger
-}
+func (ldbo *levelDBOptions) Marshal(goldbo *goleveldb.Options) { _ = "STUB: not implemented"; return }
 
 type jsonConfig struct {
 	Folder         string         `json:"folder,omitempty"`
@@ -148,96 +82,35 @@ type jsonConfig struct {
 
 // ConfigKey returns a human-friendly identifier for this type of Datastore.
 func (cfg *Config) ConfigKey() string {
-	return configKey
+	_ = "STUB: not implemented"
+
+	// Default initializes this Config with sensible values.
+	return ""
 }
 
-// Default initializes this Config with sensible values.
-func (cfg *Config) Default() error {
-	cfg.Folder = DefaultSubFolder
-	cfg.LevelDBOptions = DefaultLevelDBOptions
-	return nil
-}
+func (cfg *Config) Default() error { _ = "STUB: not implemented"; return nil }
 
 // ApplyEnvVars fills in any Config fields found as environment variables.
-func (cfg *Config) ApplyEnvVars() error {
-	jcfg := cfg.toJSONConfig()
-
-	err := envconfig.Process(envConfigKey, jcfg)
-	if err != nil {
-		return err
-	}
-
-	return cfg.applyJSONConfig(jcfg)
-}
+func (cfg *Config) ApplyEnvVars() error { _ = "STUB: not implemented"; return nil }
 
 // Validate checks that the fields of this Config have working values,
 // at least in appearance.
-func (cfg *Config) Validate() error {
-	if cfg.Folder == "" {
-		return errors.New("folder is unset")
-	}
-
-	return nil
-}
+func (cfg *Config) Validate() error { _ = "STUB: not implemented"; return nil }
 
 // LoadJSON reads the fields of this Config from a JSON byteslice as
 // generated by ToJSON.
-func (cfg *Config) LoadJSON(raw []byte) error {
-	jcfg := &jsonConfig{}
-	err := json.Unmarshal(raw, jcfg)
-	if err != nil {
-		return err
-	}
-	cfg.Default()
+func (cfg *Config) LoadJSON(raw []byte) error { _ = "STUB: not implemented"; return nil }
 
-	return cfg.applyJSONConfig(jcfg)
-}
-
-func (cfg *Config) applyJSONConfig(jcfg *jsonConfig) error {
-	config.SetIfNotDefault(jcfg.Folder, &cfg.Folder)
-
-	ldbOpts := jcfg.LevelDBOptions.Unmarshal()
-
-	if err := mergo.Merge(&cfg.LevelDBOptions, ldbOpts, mergo.WithOverride); err != nil {
-		return err
-	}
-
-	return cfg.Validate()
-}
+func (cfg *Config) applyJSONConfig(jcfg *jsonConfig) error { _ = "STUB: not implemented"; return nil }
 
 // ToJSON generates a JSON-formatted human-friendly representation of this
 // Config.
-func (cfg *Config) ToJSON() (raw []byte, err error) {
-	jcfg := cfg.toJSONConfig()
+func (cfg *Config) ToJSON() (raw []byte, err error) { _ = "STUB: not implemented"; return nil, nil }
 
-	raw, err = config.DefaultJSONMarshal(jcfg)
-	return
-}
-
-func (cfg *Config) toJSONConfig() *jsonConfig {
-	jCfg := &jsonConfig{}
-
-	if cfg.Folder != DefaultSubFolder {
-		jCfg.Folder = cfg.Folder
-	}
-
-	bo := &levelDBOptions{}
-	bo.Marshal(&cfg.LevelDBOptions)
-	jCfg.LevelDBOptions = *bo
-
-	return jCfg
-}
+func (cfg *Config) toJSONConfig() *jsonConfig { _ = "STUB: not implemented"; return nil }
 
 // GetFolder returns the LevelDB folder.
-func (cfg *Config) GetFolder() string {
-	if filepath.IsAbs(cfg.Folder) {
-		return cfg.Folder
-	}
-
-	return filepath.Join(cfg.BaseDir, cfg.Folder)
-}
+func (cfg *Config) GetFolder() string { _ = "STUB: not implemented"; return "" }
 
 // ToDisplayJSON returns JSON config as a string.
-func (cfg *Config) ToDisplayJSON() ([]byte, error) {
-	return config.DisplayJSON(cfg.toJSONConfig())
-}
+func (cfg *Config) ToDisplayJSON() ([]byte, error) { _ = "STUB: not implemented"; return nil, nil }

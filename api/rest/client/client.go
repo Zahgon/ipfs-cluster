@@ -5,8 +5,6 @@ package client
 
 import (
 	"context"
-	"fmt"
-	"net"
 	"net/http"
 	"time"
 
@@ -19,12 +17,6 @@ import (
 	peer "github.com/libp2p/go-libp2p/core/peer"
 	pnet "github.com/libp2p/go-libp2p/core/pnet"
 	ma "github.com/multiformats/go-multiaddr"
-	madns "github.com/multiformats/go-multiaddr-dns"
-	manet "github.com/multiformats/go-multiaddr/net"
-
-	"go.opencensus.io/plugin/ochttp"
-	"go.opencensus.io/plugin/ochttp/propagation/tracecontext"
-	"go.opencensus.io/trace"
 )
 
 // Configuration defaults
@@ -179,22 +171,14 @@ type Config struct {
 
 // AsTemplateFor creates client configs from resolved multiaddresses
 func (c *Config) AsTemplateFor(addrs []ma.Multiaddr) []*Config {
-	var cfgs []*Config
-	for _, addr := range addrs {
-		cfg := *c
-		cfg.APIAddr = addr
-		cfgs = append(cfgs, &cfg)
-	}
-	return cfgs
+	_ = "STUB: not implemented"
+	return nil
 }
 
 // AsTemplateForResolvedAddress creates client configs from a multiaddress
 func (c *Config) AsTemplateForResolvedAddress(ctx context.Context, addr ma.Multiaddr) ([]*Config, error) {
-	resolvedAddrs, err := resolveAddr(ctx, addr)
-	if err != nil {
-		return nil, err
-	}
-	return c.AsTemplateFor(resolvedAddrs), nil
+	_ = "STUB: not implemented"
+	return nil, nil
 }
 
 // DefaultClient provides methods to interact with the ipfs-cluster API. Use
@@ -212,198 +196,57 @@ type defaultClient struct {
 
 // NewDefaultClient initializes a client given a Config.
 func NewDefaultClient(cfg *Config) (Client, error) {
-	ctx, cancel := context.WithCancel(context.Background())
-	client := &defaultClient{
-		ctx:    ctx,
-		cancel: cancel,
-		config: cfg,
-	}
-
-	if client.config.Port == "" {
-		client.config.Port = fmt.Sprintf("%d", DefaultPort)
-	}
-
-	err := client.setupAPIAddr()
-	if err != nil {
-		return nil, err
-	}
-
-	err = client.resolveAPIAddr()
-	if err != nil {
-		return nil, err
-	}
-
-	err = client.setupHTTPClient()
-	if err != nil {
-		return nil, err
-	}
-
-	err = client.setupHostname()
-	if err != nil {
-		return nil, err
-	}
-
-	err = client.setupProxy()
-	if err != nil {
-		return nil, err
-	}
-
-	if lvl := cfg.LogLevel; lvl != "" {
-		logging.SetLogLevel(loggingFacility, lvl)
-	} else {
-		logging.SetLogLevel(loggingFacility, DefaultLogLevel)
-	}
-
-	return client, nil
+	_ = "STUB: not implemented"
+	return *new(Client), nil
 }
 
-func (c *defaultClient) setupAPIAddr() error {
-	if c.config.APIAddr != nil {
-		return nil // already setup by user
-	}
+func (c *defaultClient) setupAPIAddr() error { _ = "STUB: not implemented"; return nil }
 
-	var addr ma.Multiaddr
-	var err error
+// already setup by user
 
-	if c.config.Host == "" { //default
-		addr, err := ma.NewMultiaddr(DefaultAPIAddr)
-		c.config.APIAddr = addr
-		return err
-	}
-
-	var addrStr string
-	ip := net.ParseIP(c.config.Host)
-	switch {
-	case ip == nil:
-		addrStr = fmt.Sprintf("/dns4/%s/tcp/%s", c.config.Host, c.config.Port)
-	case ip.To4() != nil:
-		addrStr = fmt.Sprintf("/ip4/%s/tcp/%s", c.config.Host, c.config.Port)
-	default:
-		addrStr = fmt.Sprintf("/ip6/%s/tcp/%s", c.config.Host, c.config.Port)
-	}
-
-	addr, err = ma.NewMultiaddr(addrStr)
-	c.config.APIAddr = addr
-	return err
-}
+//default
 
 func (c *defaultClient) resolveAPIAddr() error {
+	_ = "STUB: not implemented"
 	// Only resolve libp2p addresses. For HTTP addresses, we let
 	// the default client handle any resolving. We extract the hostname
 	// in setupHostname()
-	if !IsPeerAddress(c.config.APIAddr) {
-		return nil
-	}
-	resolved, err := resolveAddr(c.ctx, c.config.APIAddr)
-	if err != nil {
-		return err
-	}
-	c.config.APIAddr = resolved[0]
 	return nil
 }
 
-func (c *defaultClient) setupHTTPClient() error {
-	var err error
-
-	switch {
-	case IsPeerAddress(c.config.APIAddr):
-		err = c.enableLibp2p()
-	case isUnixSocketAddress(c.config.APIAddr):
-		err = c.enableUnix()
-	case c.config.SSL:
-		err = c.enableTLS()
-	default:
-		c.defaultTransport()
-	}
-
-	if err != nil {
-		return err
-	}
-
-	c.client = &http.Client{
-		Transport: &ochttp.Transport{
-			Base:           c.transport,
-			Propagation:    &tracecontext.HTTPFormat{},
-			StartOptions:   trace.StartOptions{SpanKind: trace.SpanKindClient},
-			FormatSpanName: func(req *http.Request) string { return req.Host + ":" + req.URL.Path + ":" + req.Method },
-			NewClientTrace: ochttp.NewSpanAnnotatingClientTrace,
-		},
-		Timeout: c.config.Timeout,
-	}
-	return nil
-}
+func (c *defaultClient) setupHTTPClient() error { _ = "STUB: not implemented"; return nil }
 
 func (c *defaultClient) setupHostname() error {
+	_ = "STUB: not implemented"
 	// Extract host:port form APIAddr or use Host:Port.
 	// For libp2p, hostname is set in enableLibp2p()
 	// For unix sockets, hostname set in enableUnix()
-	if IsPeerAddress(c.config.APIAddr) || isUnixSocketAddress(c.config.APIAddr) {
-		return nil
-	}
-	_, hostname, err := manet.DialArgs(c.config.APIAddr)
-	if err != nil {
-		return err
-	}
-
-	c.hostname = hostname
 	return nil
 }
 
-func (c *defaultClient) setupProxy() error {
-	if c.config.ProxyAddr != nil {
-		return nil
-	}
+func (c *defaultClient) setupProxy() error { _ = "STUB: not implemented"; return nil }
 
-	// Guess location from	APIAddr
-	port, err := ma.NewMultiaddr(fmt.Sprintf("/tcp/%d", DefaultProxyPort))
-	if err != nil {
-		return err
-	}
-	c.config.ProxyAddr = ma.Split(c.config.APIAddr)[0].Encapsulate(port)
-	return nil
-}
+// Guess location from	APIAddr
 
 // IPFS returns an instance of go-ipfs-api's Shell, pointing to the
 // configured ProxyAddr (or to the default Cluster's IPFS proxy port).
 // It re-uses this Client's HTTP client, thus will be constrained by
 // the same configurations affecting it (timeouts...).
 func (c *defaultClient) IPFS(ctx context.Context) *shell.Shell {
-	return shell.NewShellWithClient(c.config.ProxyAddr.String(), c.client)
+	_ = "STUB: not implemented"
+	return nil
 }
 
 // IsPeerAddress detects if the given multiaddress identifies a libp2p peer,
 // either because it has the /p2p/ protocol or because it uses /dnsaddr/
-func IsPeerAddress(addr ma.Multiaddr) bool {
-	if addr == nil {
-		return false
-	}
-	pid, err := addr.ValueForProtocol(ma.P_P2P)
-	dnsaddr, err2 := addr.ValueForProtocol(ma.P_DNSADDR)
-	return (pid != "" && err == nil) || (dnsaddr != "" && err2 == nil)
-}
+func IsPeerAddress(addr ma.Multiaddr) bool { _ = "STUB: not implemented"; return false }
 
 // isUnixSocketAddress returns if the given address corresponds to a
 // unix socket.
-func isUnixSocketAddress(addr ma.Multiaddr) bool {
-	if addr == nil {
-		return false
-	}
-	value, err := addr.ValueForProtocol(ma.P_UNIX)
-	return (value != "" && err == nil)
-}
+func isUnixSocketAddress(addr ma.Multiaddr) bool { _ = "STUB: not implemented"; return false }
 
 // resolve addr
 func resolveAddr(ctx context.Context, addr ma.Multiaddr) ([]ma.Multiaddr, error) {
-	resolveCtx, cancel := context.WithTimeout(ctx, ResolveTimeout)
-	defer cancel()
-	resolved, err := madns.Resolve(resolveCtx, addr)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(resolved) == 0 {
-		return nil, fmt.Errorf("resolving %s returned 0 results", addr)
-	}
-
-	return resolved, nil
+	_ = "STUB: not implemented"
+	return nil, nil
 }

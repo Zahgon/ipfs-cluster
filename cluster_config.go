@@ -1,22 +1,12 @@
 package ipfscluster
 
 import (
-	"crypto/rand"
-	"encoding/hex"
-	"encoding/json"
-	"errors"
-	"fmt"
-	"os"
-	"path/filepath"
-	"reflect"
 	"time"
 
 	"github.com/ipfs-cluster/ipfs-cluster/config"
 
 	pnet "github.com/libp2p/go-libp2p/core/pnet"
 	ma "github.com/multiformats/go-multiaddr"
-
-	"github.com/kelseyhightower/envconfig"
 )
 
 const configKey = "cluster"
@@ -276,463 +266,69 @@ type pubSubConfigJSON struct {
 // ConfigKey returns a human-readable string to identify
 // a cluster Config.
 func (cfg *Config) ConfigKey() string {
-	return configKey
+	_ = "STUB: not implemented"
+
+	// Default fills in all the Config fields with
+	// default working values. This means, it will
+	// generate a Secret.
+	return ""
 }
 
-// Default fills in all the Config fields with
-// default working values. This means, it will
-// generate a Secret.
-func (cfg *Config) Default() error {
-	cfg.setDefaults()
-
-	clusterSecret := make([]byte, 32)
-	n, err := rand.Read(clusterSecret)
-	if err != nil {
-		return err
-	}
-	if n != 32 {
-		return errors.New("did not generate 32-byte secret")
-	}
-
-	cfg.Secret = clusterSecret
-	return nil
-}
+func (cfg *Config) Default() error { _ = "STUB: not implemented"; return nil }
 
 // ApplyEnvVars fills in any Config fields found
 // as environment variables.
-func (cfg *Config) ApplyEnvVars() error {
-	jcfg, err := cfg.toConfigJSON()
-	if err != nil {
-		return err
-	}
-
-	err = envconfig.Process(cfg.ConfigKey(), jcfg)
-	if err != nil {
-		return err
-	}
-
-	return cfg.applyConfigJSON(jcfg)
-}
+func (cfg *Config) ApplyEnvVars() error { _ = "STUB: not implemented"; return nil }
 
 // Validate will check that the values of this config
 // seem to be working ones.
-func (cfg *Config) Validate() error {
-	if cfg.ListenAddr == nil {
-		return errors.New("cluster.listen_multiaddress is undefined")
-	}
-
-	if len(cfg.ListenAddr) == 0 {
-		return errors.New("cluster.listen_multiaddress is empty")
-	}
-
-	if cfg.ConnMgr.LowWater <= 0 {
-		return errors.New("cluster.connection_manager.low_water is invalid")
-	}
-
-	if cfg.ConnMgr.HighWater <= 0 {
-		return errors.New("cluster.connection_manager.high_water is invalid")
-	}
-
-	if cfg.ConnMgr.LowWater > cfg.ConnMgr.HighWater {
-		return errors.New("cluster.connection_manager.low_water is greater than high_water")
-	}
-
-	if cfg.ConnMgr.GracePeriod == 0 {
-		return errors.New("cluster.connection_manager.grace_period is invalid")
-	}
-
-	if cfg.PubSub.SeenMessagesTTL <= 0 {
-		return errors.New("cluster.pubsub.seen_message_ttl is invalid")
-	}
-
-	if cfg.PubSub.HeartbeatInterval <= 0 {
-		return errors.New("cluster.pubsub.heartbeat_interval is invalid")
-	}
-
-	if cfg.PubSub.DFactor < 1 {
-		return errors.New("cluster.pubsub.d_factor is invalid")
-	}
-
-	if cfg.PubSub.HistoryGossip <= 0 {
-		return errors.New("cluster.pubsub.history_gossip is invalid")
-	}
-
-	if cfg.PubSub.HistoryLength <= 0 {
-		return errors.New("cluster.pubsub.history_length is invalid")
-	}
-
-	if cfg.DialPeerTimeout <= 0 {
-		return errors.New("cluster.dial_peer_timeout is invalid")
-	}
-
-	if cfg.StateSyncInterval <= 0 {
-		return errors.New("cluster.state_sync_interval is invalid")
-	}
-
-	if cfg.PinRecoverInterval <= 0 {
-		return errors.New("cluster.pin_recover_interval is invalid")
-	}
-
-	if cfg.MonitorPingInterval <= 0 {
-		return errors.New("cluster.monitoring_interval is invalid")
-	}
-
-	if cfg.PeerWatchInterval <= 0 {
-		return errors.New("cluster.peer_watch_interval is invalid")
-	}
-
-	if cfg.PinOnlyOnTrustedPeers && cfg.PinOnlyOnUntrustedPeers {
-		return errors.New("cluster.pin_only_on_trusted_peers and pin_only_on_untrusted_peers cannot both be true")
-	}
-
-	rfMax := cfg.ReplicationFactorMax
-	rfMin := cfg.ReplicationFactorMin
-
-	if err := isReplicationFactorValid(rfMin, rfMax); err != nil {
-		return err
-	}
-
-	return isRPCPolicyValid(cfg.RPCPolicy)
-}
+func (cfg *Config) Validate() error { _ = "STUB: not implemented"; return nil }
 
 func isReplicationFactorValid(rplMin, rplMax int) error {
+	_ = "STUB: not implemented"
 	// check Max and Min are correct
-	if rplMin == 0 || rplMax == 0 {
-		return errors.New("cluster.replication_factor_min and max must be set")
-	}
-
-	if rplMin > rplMax {
-		return errors.New("cluster.replication_factor_min is larger than max")
-	}
-
-	if rplMin < -1 {
-		return errors.New("cluster.replication_factor_min is wrong")
-	}
-
-	if rplMax < -1 {
-		return errors.New("cluster.replication_factor_max is wrong")
-	}
-
-	if (rplMin == -1 && rplMax != -1) || (rplMin != -1 && rplMax == -1) {
-		return errors.New("cluster.replication_factor_min and max must be -1 when one of them is")
-	}
 	return nil
 }
 
-func isRPCPolicyValid(p map[string]RPCEndpointType) error {
-	rpcComponents := []interface{}{
-		&ClusterRPCAPI{},
-		&PinTrackerRPCAPI{},
-		&IPFSConnectorRPCAPI{},
-		&ConsensusRPCAPI{},
-		&PeerMonitorRPCAPI{},
-	}
-
-	total := 0
-	for _, c := range rpcComponents {
-		t := reflect.TypeOf(c)
-		for i := 0; i < t.NumMethod(); i++ {
-			total++
-			method := t.Method(i)
-			name := fmt.Sprintf("%s.%s", RPCServiceID(c), method.Name)
-			_, ok := p[name]
-			if !ok {
-				return fmt.Errorf("RPCPolicy is missing the %s method", name)
-			}
-		}
-	}
-	if len(p) != total {
-		logger.Warn("defined RPC policy has more entries than needed")
-	}
-	return nil
-}
+func isRPCPolicyValid(p map[string]RPCEndpointType) error { _ = "STUB: not implemented"; return nil }
 
 // this just sets non-generated defaults
-func (cfg *Config) setDefaults() {
-	hostname, err := os.Hostname()
-	if err != nil {
-		hostname = ""
-	}
-	cfg.Peername = hostname
+func (cfg *Config) setDefaults() { _ = "STUB: not implemented"; return }
 
-	listenAddrs := []ma.Multiaddr{}
-	for _, m := range DefaultListenAddrs {
-		addr, _ := ma.NewMultiaddr(m)
-		listenAddrs = append(listenAddrs, addr)
-	}
-	cfg.ListenAddr = listenAddrs
-	cfg.AnnounceAddr = []ma.Multiaddr{}
-	cfg.NoAnnounceAddr = []ma.Multiaddr{}
-	cfg.EnableRelayHop = DefaultEnableRelayHop
-	cfg.ConnMgr = ConnMgrConfig{
-		HighWater:   DefaultConnMgrHighWater,
-		LowWater:    DefaultConnMgrLowWater,
-		GracePeriod: DefaultConnMgrGracePeriod,
-	}
-	cfg.ResourceMgr = ResourceMgrConfig{
-		Enabled:              DefaultResourceMgrEnabled,
-		MemoryLimitBytes:     DefaultResourceMgrMemoryLimitBytes,
-		FileDescriptorsLimit: DefaultResourceMgrFileDescriptorsLimit,
-	}
-	cfg.PubSub = PubSubConfig{
-		SeenMessagesTTL:   DefaultPubSubSeenMessagesTTL,
-		HeartbeatInterval: DefaultPubSubHeartbeatInterval,
-		DFactor:           DefaultPubSubDFactor,
-		HistoryGossip:     DefaultPubSubHistoryGossip,
-		HistoryLength:     DefaultPubSubHistoryLength,
-		FloodPublish:      false,
-	}
-
-	cfg.DialPeerTimeout = DefaultDialPeerTimeout
-	cfg.LeaveOnShutdown = DefaultLeaveOnShutdown
-	cfg.StateSyncInterval = DefaultStateSyncInterval
-	cfg.PinRecoverInterval = DefaultPinRecoverInterval
-	cfg.ReplicationFactorMin = DefaultReplicationFactor
-	cfg.ReplicationFactorMax = DefaultReplicationFactor
-	cfg.MonitorPingInterval = DefaultMonitorPingInterval
-	cfg.PeerWatchInterval = DefaultPeerWatchInterval
-	cfg.MDNSInterval = DefaultMDNSInterval
-	cfg.PinOnlyOnTrustedPeers = DefaultPinOnlyOnTrustedPeers
-	cfg.PinOnlyOnUntrustedPeers = DefaultPinOnlyOnUntrustedPeers
-	cfg.DisableRepinning = DefaultDisableRepinning
-	cfg.FollowerMode = DefaultFollowerMode
-	cfg.PeerstoreFile = "" // empty so it gets omitted.
-	cfg.PeerAddresses = []ma.Multiaddr{}
-	cfg.RPCPolicy = DefaultRPCPolicy
-}
+// empty so it gets omitted.
 
 // LoadJSON receives a raw json-formatted configuration and
 // sets the Config fields from it. Note that it should be JSON
 // as generated by ToJSON().
-func (cfg *Config) LoadJSON(raw []byte) error {
-	jcfg := &configJSON{}
-	err := json.Unmarshal(raw, jcfg)
-	if err != nil {
-		logger.Error("Error unmarshaling cluster config")
-		return err
-	}
+func (cfg *Config) LoadJSON(raw []byte) error { _ = "STUB: not implemented"; return nil }
 
-	cfg.setDefaults()
+func (cfg *Config) applyConfigJSON(jcfg *configJSON) error { _ = "STUB: not implemented"; return nil }
 
-	return cfg.applyConfigJSON(jcfg)
-}
-
-func (cfg *Config) applyConfigJSON(jcfg *configJSON) error {
-	config.SetIfNotDefault(jcfg.PeerstoreFile, &cfg.PeerstoreFile)
-
-	config.SetIfNotDefault(jcfg.Peername, &cfg.Peername)
-
-	clusterSecret, err := DecodeClusterSecret(jcfg.Secret)
-	if err != nil {
-		err = fmt.Errorf("error loading cluster secret from config: %s", err)
-		return err
-	}
-	cfg.Secret = clusterSecret
-
-	listenAddrs, err := toMultiAddrs(jcfg.ListenMultiaddress)
-	if err != nil {
-		err = fmt.Errorf("error parsing listen_multiaddress: %s", err)
-		return err
-	}
-	cfg.ListenAddr = listenAddrs
-
-	announceAddrs, err := toMultiAddrs(jcfg.AnnounceMultiaddress)
-	if err != nil {
-		err = fmt.Errorf("error parsing announce: %s", err)
-		return err
-	}
-	cfg.AnnounceAddr = announceAddrs
-
-	noAnnounceAddrs, err := toMultiAddrs(jcfg.NoAnnounceMultiaddress)
-	if err != nil {
-		err = fmt.Errorf("error parsing no_announce: %s", err)
-		return err
-	}
-	cfg.NoAnnounceAddr = noAnnounceAddrs
-
-	cfg.EnableRelayHop = jcfg.EnableRelayHop
-	if conman := jcfg.ConnectionManager; conman != nil {
-		cfg.ConnMgr = ConnMgrConfig{
-			HighWater: jcfg.ConnectionManager.HighWater,
-			LowWater:  jcfg.ConnectionManager.LowWater,
-		}
-		err = config.ParseDurations("cluster",
-			&config.DurationOpt{Duration: jcfg.ConnectionManager.GracePeriod, Dst: &cfg.ConnMgr.GracePeriod, Name: "connection_manager.grace_period"},
-		)
-		if err != nil {
-			return err
-		}
-	}
-
-	if rmgr := jcfg.ResourceManager; rmgr != nil {
-		cfg.ResourceMgr.Enabled = rmgr.Enabled
-		cfg.ResourceMgr.MemoryLimitBytes = rmgr.MemoryLimitBytes
-		cfg.ResourceMgr.FileDescriptorsLimit = rmgr.FileDescriptorsLimit
-	}
-
-	if pubsub := jcfg.PubSub; pubsub != nil {
-		cfg.PubSub.DFactor = pubsub.DFactor
-		cfg.PubSub.HistoryGossip = pubsub.HistoryGossip
-		cfg.PubSub.HistoryLength = pubsub.HistoryLength
-		cfg.PubSub.FloodPublish = pubsub.FloodPublish
-		err = config.ParseDurations("cluster.pubsub",
-			&config.DurationOpt{Duration: pubsub.SeenMessagesTTL, Dst: &cfg.PubSub.SeenMessagesTTL, Name: "seen_messages_ttl"},
-			&config.DurationOpt{Duration: pubsub.HeartbeatInterval, Dst: &cfg.PubSub.HeartbeatInterval, Name: "heartbeat_interval"},
-		)
-		if err != nil {
-			return err
-		}
-	}
-
-	rplMin := jcfg.ReplicationFactorMin
-	rplMax := jcfg.ReplicationFactorMax
-	config.SetIfNotDefault(rplMin, &cfg.ReplicationFactorMin)
-	config.SetIfNotDefault(rplMax, &cfg.ReplicationFactorMax)
-
-	err = config.ParseDurations("cluster",
-		&config.DurationOpt{Duration: jcfg.DialPeerTimeout, Dst: &cfg.DialPeerTimeout, Name: "dial_peer_timeout"},
-		&config.DurationOpt{Duration: jcfg.StateSyncInterval, Dst: &cfg.StateSyncInterval, Name: "state_sync_interval"},
-		&config.DurationOpt{Duration: jcfg.PinRecoverInterval, Dst: &cfg.PinRecoverInterval, Name: "pin_recover_interval"},
-		&config.DurationOpt{Duration: jcfg.MonitorPingInterval, Dst: &cfg.MonitorPingInterval, Name: "monitor_ping_interval"},
-		&config.DurationOpt{Duration: jcfg.PeerWatchInterval, Dst: &cfg.PeerWatchInterval, Name: "peer_watch_interval"},
-		&config.DurationOpt{Duration: jcfg.MDNSInterval, Dst: &cfg.MDNSInterval, Name: "mdns_interval"},
-	)
-	if err != nil {
-		return err
-	}
-
-	// PeerAddresses
-	peerAddrs := []ma.Multiaddr{}
-	for _, addr := range jcfg.PeerAddresses {
-		peerAddr, err := ma.NewMultiaddr(addr)
-		if err != nil {
-			err = fmt.Errorf("error parsing peer_addresses: %s", err)
-			return err
-		}
-		peerAddrs = append(peerAddrs, peerAddr)
-	}
-	cfg.PeerAddresses = peerAddrs
-	cfg.LeaveOnShutdown = jcfg.LeaveOnShutdown
-	cfg.PinOnlyOnTrustedPeers = jcfg.PinOnlyOnTrustedPeers
-	cfg.PinOnlyOnUntrustedPeers = jcfg.PinOnlyOnUntrustedPeers
-	cfg.DisableRepinning = jcfg.DisableRepinning
-	cfg.FollowerMode = jcfg.FollowerMode
-
-	return cfg.Validate()
-}
+// PeerAddresses
 
 // ToJSON generates a human-friendly version of Config.
-func (cfg *Config) ToJSON() (raw []byte, err error) {
-	jcfg, err := cfg.toConfigJSON()
-	if err != nil {
-		return
-	}
-
-	raw, err = json.MarshalIndent(jcfg, "", "    ")
-	return
-}
+func (cfg *Config) ToJSON() (raw []byte, err error) { _ = "STUB: not implemented"; return nil, nil }
 
 func (cfg *Config) toConfigJSON() (jcfg *configJSON, err error) {
+	_ = "STUB: not implemented"
 	// Multiaddress String() may panic
-	defer func() {
-		if r := recover(); r != nil {
-			err = fmt.Errorf("%s", r)
-		}
-	}()
-
-	jcfg = &configJSON{}
-
-	// Set all configuration fields
-	jcfg.Peername = cfg.Peername
-	jcfg.Secret = EncodeProtectorKey(cfg.Secret)
-	jcfg.ReplicationFactorMin = cfg.ReplicationFactorMin
-	jcfg.ReplicationFactorMax = cfg.ReplicationFactorMax
-	jcfg.LeaveOnShutdown = cfg.LeaveOnShutdown
-	var listenAddrs config.Strings
-	for _, addr := range cfg.ListenAddr {
-		listenAddrs = append(listenAddrs, addr.String())
-	}
-	jcfg.ListenMultiaddress = config.Strings(listenAddrs)
-	jcfg.AnnounceMultiaddress = multiAddrstoStrings(cfg.AnnounceAddr)
-	jcfg.NoAnnounceMultiaddress = multiAddrstoStrings(cfg.NoAnnounceAddr)
-	jcfg.EnableRelayHop = cfg.EnableRelayHop
-	jcfg.ConnectionManager = &connMgrConfigJSON{
-		HighWater:   cfg.ConnMgr.HighWater,
-		LowWater:    cfg.ConnMgr.LowWater,
-		GracePeriod: cfg.ConnMgr.GracePeriod.String(),
-	}
-	jcfg.ResourceManager = &resourceMgrConfigJSON{
-		Enabled:              cfg.ResourceMgr.Enabled,
-		MemoryLimitBytes:     cfg.ResourceMgr.MemoryLimitBytes,
-		FileDescriptorsLimit: cfg.ResourceMgr.FileDescriptorsLimit,
-	}
-	jcfg.PubSub = &pubSubConfigJSON{
-		SeenMessagesTTL:   cfg.PubSub.SeenMessagesTTL.String(),
-		HeartbeatInterval: cfg.PubSub.HeartbeatInterval.String(),
-		DFactor:           cfg.PubSub.DFactor,
-		HistoryGossip:     cfg.PubSub.HistoryGossip,
-		HistoryLength:     cfg.PubSub.HistoryLength,
-		FloodPublish:      cfg.PubSub.FloodPublish,
-	}
-	jcfg.DialPeerTimeout = cfg.DialPeerTimeout.String()
-	jcfg.StateSyncInterval = cfg.StateSyncInterval.String()
-	jcfg.PinRecoverInterval = cfg.PinRecoverInterval.String()
-	jcfg.MonitorPingInterval = cfg.MonitorPingInterval.String()
-	jcfg.PeerWatchInterval = cfg.PeerWatchInterval.String()
-	jcfg.MDNSInterval = cfg.MDNSInterval.String()
-	jcfg.PinOnlyOnTrustedPeers = cfg.PinOnlyOnTrustedPeers
-	jcfg.PinOnlyOnUntrustedPeers = cfg.PinOnlyOnUntrustedPeers
-	jcfg.DisableRepinning = cfg.DisableRepinning
-	jcfg.PeerstoreFile = cfg.PeerstoreFile
-	jcfg.PeerAddresses = []string{}
-	for _, addr := range cfg.PeerAddresses {
-		jcfg.PeerAddresses = append(jcfg.PeerAddresses, addr.String())
-	}
-	jcfg.FollowerMode = cfg.FollowerMode
-
-	return
+	return nil, nil
 }
+
+// Set all configuration fields
 
 // GetPeerstorePath returns the full path of the
 // PeerstoreFile, obtained by concatenating that value
 // with BaseDir of the configuration, if set.
 // An empty string is returned when BaseDir is not set.
-func (cfg *Config) GetPeerstorePath() string {
-	if cfg.BaseDir == "" {
-		return ""
-	}
-
-	filename := DefaultPeerstoreFile
-	if cfg.PeerstoreFile != "" {
-		filename = cfg.PeerstoreFile
-	}
-
-	return filepath.Join(cfg.BaseDir, filename)
-}
+func (cfg *Config) GetPeerstorePath() string { _ = "STUB: not implemented"; return "" }
 
 // ToDisplayJSON returns JSON config as a string.
-func (cfg *Config) ToDisplayJSON() ([]byte, error) {
-	jcfg, err := cfg.toConfigJSON()
-	if err != nil {
-		return nil, err
-	}
-	return config.DisplayJSON(jcfg)
-}
+func (cfg *Config) ToDisplayJSON() ([]byte, error) { _ = "STUB: not implemented"; return nil, nil }
 
 // DecodeClusterSecret parses a hex-encoded string, checks that it is exactly
 // 32 bytes long and returns its value as a byte-slice.x
 func DecodeClusterSecret(hexSecret string) ([]byte, error) {
-	secret, err := hex.DecodeString(hexSecret)
-	if err != nil {
-		return nil, err
-	}
-	switch secretLen := len(secret); secretLen {
-	case 0:
-		logger.Warn("Cluster secret is empty, cluster will start on unprotected network.")
-		return nil, nil
-	case 32:
-		return secret, nil
-	default:
-		return nil, fmt.Errorf("input secret is %d bytes, cluster secret should be 32", secretLen)
-	}
+	_ = "STUB: not implemented"
+	return nil, nil
 }

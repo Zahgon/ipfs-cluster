@@ -14,11 +14,9 @@ import (
 	logging "github.com/ipfs/go-log/v2"
 	"github.com/libp2p/go-libp2p/gologshim"
 	"github.com/multiformats/go-multiaddr"
-	"github.com/pkg/errors"
 	cli "github.com/urfave/cli/v2"
 
 	"github.com/ipfs-cluster/ipfs-cluster/api/rest/client"
-	"github.com/ipfs-cluster/ipfs-cluster/cmdutils"
 	"github.com/ipfs-cluster/ipfs-cluster/version"
 )
 
@@ -290,51 +288,24 @@ as obtained from the internal state on disk.
 // build paths returns the path to the configuration folder,
 // the identity.json and the service.json files.
 func buildPaths(c *cli.Context, clusterName string) (string, string, string) {
-	absPath, err := filepath.Abs(c.String("config"))
-	if err != nil {
-		cmdutils.ErrorOut("error getting absolute path for %s: %s", clusterName, err)
-		os.Exit(1)
-	}
-
-	// ~/.ipfs-cluster-follow/clusterName
-	absPath = filepath.Join(absPath, clusterName)
-	// ~/.ipfs-cluster-follow/clusterName/service.json
-	configPath = filepath.Join(absPath, DefaultConfigFile)
-	// ~/.ipfs-cluster-follow/clusterName/indentity.json
-	identityPath = filepath.Join(absPath, DefaultIdentityFile)
-
-	return absPath, configPath, identityPath
+	_ = "STUB: not implemented"
+	return "", "", ""
 }
 
+// ~/.ipfs-cluster-follow/clusterName
+
+// ~/.ipfs-cluster-follow/clusterName/service.json
+
+// ~/.ipfs-cluster-follow/clusterName/indentity.json
+
 func socketAddress(absPath, clusterName string) (multiaddr.Multiaddr, error) {
-	socket := fmt.Sprintf("/unix/%s", filepath.Join(absPath, "api-socket"))
-	ma, err := multiaddr.NewMultiaddr(socket)
-	if err != nil {
-		return nil, errors.Wrapf(err, "error parsing socket: %s", socket)
-	}
-	return ma, nil
+	_ = "STUB: not implemented"
+	return *new(multiaddr.Multiaddr), nil
 }
 
 // returns an REST API client. Points to the socket address unless
 // CLUSTER_RESTAPI_HTTPLISTENMULTIADDRESS is set, in which case it uses it.
 func getClient(absPath, clusterName string) (client.Client, error) {
-	var endp multiaddr.Multiaddr
-	var err error
-	if endpStr := os.Getenv("CLUSTER_RESTAPI_HTTPLISTENMULTIADDRESS"); endpStr != "" {
-		endp, err = multiaddr.NewMultiaddr(endpStr)
-		if err != nil {
-			return nil, errors.Wrapf(err, "error parsing the value of CLUSTER_RESTAPI_HTTPLISTENMULTIADDRESS: %s", endpStr)
-		}
-	} else {
-		endp, err = socketAddress(absPath, clusterName)
-	}
-
-	if err != nil {
-		return nil, err
-	}
-
-	cfg := client.Config{
-		APIAddr: endp,
-	}
-	return client.NewDefaultClient(&cfg)
+	_ = "STUB: not implemented"
+	return *new(client.Client), nil
 }

@@ -1,19 +1,13 @@
 package raft
 
 import (
-	"encoding/json"
-	"errors"
-	"io"
-	"path/filepath"
 	"time"
 
-	"github.com/ipfs-cluster/ipfs-cluster/api"
 	"github.com/ipfs-cluster/ipfs-cluster/config"
 
 	peer "github.com/libp2p/go-libp2p/core/peer"
 
 	hraft "github.com/hashicorp/raft"
-	"github.com/kelseyhightower/envconfig"
 )
 
 // ConfigKey is the default configuration key for holding this component's
@@ -147,174 +141,55 @@ type jsonConfig struct {
 
 // ConfigKey returns a human-friendly identifier for this Config.
 func (cfg *Config) ConfigKey() string {
-	return configKey
+	_ = "STUB: not implemented"
+
+	// Validate checks that this configuration has working values,
+	// at least in appearance.
+	return ""
 }
 
-// Validate checks that this configuration has working values,
-// at least in appearance.
-func (cfg *Config) Validate() error {
-	if cfg.RaftConfig == nil {
-		return errors.New("no hashicorp/raft.Config")
-	}
-	if cfg.WaitForLeaderTimeout <= 0 {
-		return errors.New("wait_for_leader_timeout <= 0")
-	}
-
-	if cfg.NetworkTimeout <= 0 {
-		return errors.New("network_timeout <= 0")
-	}
-
-	if cfg.CommitRetries < 0 {
-		return errors.New("commit_retries is invalid")
-	}
-
-	if cfg.CommitRetryDelay <= 0 {
-		return errors.New("commit_retry_delay is invalid")
-	}
-
-	if cfg.BackupsRotate <= 0 {
-		return errors.New("backups_rotate should be larger than 0")
-	}
-
-	return hraft.ValidateConfig(cfg.RaftConfig)
-}
+func (cfg *Config) Validate() error { _ = "STUB: not implemented"; return nil }
 
 // LoadJSON parses a json-encoded configuration (see jsonConfig).
 // The Config will have default values for all fields not explicited
 // in the given json object.
-func (cfg *Config) LoadJSON(raw []byte) error {
-	jcfg := &jsonConfig{}
-	err := json.Unmarshal(raw, jcfg)
-	if err != nil {
-		logger.Error("Error unmarshaling raft config")
-		return err
-	}
+func (cfg *Config) LoadJSON(raw []byte) error { _ = "STUB: not implemented"; return nil }
 
-	cfg.Default()
+func (cfg *Config) applyJSONConfig(jcfg *jsonConfig) error { _ = "STUB: not implemented"; return nil }
 
-	return cfg.applyJSONConfig(jcfg)
-}
+// Parse durations. We ignore errors as 0 will take Default values.
 
-func (cfg *Config) applyJSONConfig(jcfg *jsonConfig) error {
-	parseDuration := func(txt string) time.Duration {
-		d, _ := time.ParseDuration(txt)
-		if txt != "" && d == 0 {
-			logger.Warnf("%s is not a valid duration. Default will be used", txt)
-		}
-		return d
-	}
+// Set all values in config. For some, take defaults if they are 0.
+// Set values from jcfg if they are not 0 values
 
-	// Parse durations. We ignore errors as 0 will take Default values.
-	waitForLeaderTimeout := parseDuration(jcfg.WaitForLeaderTimeout)
-	networkTimeout := parseDuration(jcfg.NetworkTimeout)
-	commitRetryDelay := parseDuration(jcfg.CommitRetryDelay)
-	heartbeatTimeout := parseDuration(jcfg.HeartbeatTimeout)
-	electionTimeout := parseDuration(jcfg.ElectionTimeout)
-	commitTimeout := parseDuration(jcfg.CommitTimeout)
-	snapshotInterval := parseDuration(jcfg.SnapshotInterval)
-	leaderLeaseTimeout := parseDuration(jcfg.LeaderLeaseTimeout)
+// Own values
 
-	// Set all values in config. For some, take defaults if they are 0.
-	// Set values from jcfg if they are not 0 values
-
-	// Own values
-	config.SetIfNotDefault(jcfg.DataFolder, &cfg.DataFolder)
-	config.SetIfNotDefault(waitForLeaderTimeout, &cfg.WaitForLeaderTimeout)
-	config.SetIfNotDefault(networkTimeout, &cfg.NetworkTimeout)
-	cfg.CommitRetries = jcfg.CommitRetries
-	config.SetIfNotDefault(commitRetryDelay, &cfg.CommitRetryDelay)
-	config.SetIfNotDefault(jcfg.BackupsRotate, &cfg.BackupsRotate)
-
-	// Raft values
-	config.SetIfNotDefault(heartbeatTimeout, &cfg.RaftConfig.HeartbeatTimeout)
-	config.SetIfNotDefault(electionTimeout, &cfg.RaftConfig.ElectionTimeout)
-	config.SetIfNotDefault(commitTimeout, &cfg.RaftConfig.CommitTimeout)
-	config.SetIfNotDefault(jcfg.MaxAppendEntries, &cfg.RaftConfig.MaxAppendEntries)
-	config.SetIfNotDefault(jcfg.TrailingLogs, &cfg.RaftConfig.TrailingLogs)
-	config.SetIfNotDefault(snapshotInterval, &cfg.RaftConfig.SnapshotInterval)
-	config.SetIfNotDefault(jcfg.SnapshotThreshold, &cfg.RaftConfig.SnapshotThreshold)
-	config.SetIfNotDefault(leaderLeaseTimeout, &cfg.RaftConfig.LeaderLeaseTimeout)
-
-	cfg.InitPeerset = api.StringsToPeers(jcfg.InitPeerset)
-	return cfg.Validate()
-}
+// Raft values
 
 // ToJSON returns the pretty JSON representation of a Config.
-func (cfg *Config) ToJSON() ([]byte, error) {
-	jcfg := cfg.toJSONConfig()
+func (cfg *Config) ToJSON() ([]byte, error) { _ = "STUB: not implemented"; return nil, nil }
 
-	return config.DefaultJSONMarshal(jcfg)
-}
+func (cfg *Config) toJSONConfig() *jsonConfig { _ = "STUB: not implemented"; return nil }
 
-func (cfg *Config) toJSONConfig() *jsonConfig {
-	jcfg := &jsonConfig{
-		DataFolder:           cfg.DataFolder,
-		InitPeerset:          api.PeersToStrings(cfg.InitPeerset),
-		WaitForLeaderTimeout: cfg.WaitForLeaderTimeout.String(),
-		NetworkTimeout:       cfg.NetworkTimeout.String(),
-		CommitRetries:        cfg.CommitRetries,
-		CommitRetryDelay:     cfg.CommitRetryDelay.String(),
-		BackupsRotate:        cfg.BackupsRotate,
-		HeartbeatTimeout:     cfg.RaftConfig.HeartbeatTimeout.String(),
-		ElectionTimeout:      cfg.RaftConfig.ElectionTimeout.String(),
-		CommitTimeout:        cfg.RaftConfig.CommitTimeout.String(),
-		MaxAppendEntries:     cfg.RaftConfig.MaxAppendEntries,
-		TrailingLogs:         cfg.RaftConfig.TrailingLogs,
-		SnapshotInterval:     cfg.RaftConfig.SnapshotInterval.String(),
-		SnapshotThreshold:    cfg.RaftConfig.SnapshotThreshold,
-		LeaderLeaseTimeout:   cfg.RaftConfig.LeaderLeaseTimeout.String(),
-	}
-	if cfg.DatastoreNamespace != DefaultDatastoreNamespace {
-		jcfg.DatastoreNamespace = cfg.DatastoreNamespace
-		// otherwise leave empty so it gets omitted.
-	}
-	return jcfg
-}
+// otherwise leave empty so it gets omitted.
 
 // Default initializes this configuration with working defaults.
 func (cfg *Config) Default() error {
-	cfg.DataFolder = "" // empty so it gets omitted
-	cfg.InitPeerset = []peer.ID{}
-	cfg.WaitForLeaderTimeout = DefaultWaitForLeaderTimeout
-	cfg.NetworkTimeout = DefaultNetworkTimeout
-	cfg.CommitRetries = DefaultCommitRetries
-	cfg.CommitRetryDelay = DefaultCommitRetryDelay
-	cfg.BackupsRotate = DefaultBackupsRotate
-	cfg.DatastoreNamespace = DefaultDatastoreNamespace
-	cfg.RaftConfig = hraft.DefaultConfig()
-
-	// These options are imposed over any Default Raft Config.
-	cfg.RaftConfig.ShutdownOnRemove = false
-	cfg.RaftConfig.LocalID = "will_be_set_automatically"
-
-	// Set up logging
-	cfg.RaftConfig.LogOutput = io.Discard
-	cfg.RaftConfig.Logger = raftLogger
+	_ = "STUB: not implemented"
+	// empty so it gets omitted
 	return nil
 }
 
+// These options are imposed over any Default Raft Config.
+
+// Set up logging
+
 // ApplyEnvVars fills in any Config fields found
 // as environment variables.
-func (cfg *Config) ApplyEnvVars() error {
-	jcfg := cfg.toJSONConfig()
-
-	err := envconfig.Process(envConfigKey, jcfg)
-	if err != nil {
-		return err
-	}
-
-	return cfg.applyJSONConfig(jcfg)
-}
+func (cfg *Config) ApplyEnvVars() error { _ = "STUB: not implemented"; return nil }
 
 // GetDataFolder returns the Raft data folder that we are using.
-func (cfg *Config) GetDataFolder() string {
-	if cfg.DataFolder == "" {
-		return filepath.Join(cfg.BaseDir, DefaultDataSubFolder)
-	}
-	return cfg.DataFolder
-}
+func (cfg *Config) GetDataFolder() string { _ = "STUB: not implemented"; return "" }
 
 // ToDisplayJSON returns JSON config as a string.
-func (cfg *Config) ToDisplayJSON() ([]byte, error) {
-	return config.DisplayJSON(cfg.toJSONConfig())
-}
+func (cfg *Config) ToDisplayJSON() ([]byte, error) { _ = "STUB: not implemented"; return nil, nil }

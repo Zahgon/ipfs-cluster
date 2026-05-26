@@ -27,72 +27,31 @@ type Informer struct {
 }
 
 // New returns an initialized informer using the given InformerConfig.
-func New(cfg *Config) (*Informer, error) {
-	err := cfg.Validate()
-	if err != nil {
-		return nil, err
-	}
-
-	return &Informer{
-		config: cfg,
-	}, nil
-}
+func New(cfg *Config) (*Informer, error) { _ = "STUB: not implemented"; return nil, nil }
 
 // Name returns the name of this informer. Note the informer issues metrics
 // with custom names.
 func (tags *Informer) Name() string {
-	return MetricName
+	_ = "STUB: not implemented"
+
+	// SetClient provides us with an rpc.Client which allows
+	// contacting other components in the cluster.
+	return ""
 }
 
-// SetClient provides us with an rpc.Client which allows
-// contacting other components in the cluster.
-func (tags *Informer) SetClient(c *rpc.Client) {
-	tags.mu.Lock()
-	defer tags.mu.Unlock()
-	tags.rpcClient = c
-}
+func (tags *Informer) SetClient(c *rpc.Client) { _ = "STUB: not implemented"; return }
 
 // Shutdown is called on cluster shutdown. We just invalidate
 // any metrics from this point.
-func (tags *Informer) Shutdown(ctx context.Context) error {
-	tags.mu.Lock()
-	defer tags.mu.Unlock()
-
-	tags.rpcClient = nil
-	return nil
-}
+func (tags *Informer) Shutdown(ctx context.Context) error { _ = "STUB: not implemented"; return nil }
 
 // GetMetrics returns one metric for each tag defined in the configuration.
 // The metric name is set as "tags:<tag_name>". When no tags are defined,
 // a single invalid metric is returned.
 func (tags *Informer) GetMetrics(ctx context.Context) []api.Metric {
+	_ = "STUB: not implemented"
 	// Note we could potentially extend the tag:value syntax to include manual weights
 	// ie: { "region": "us:100", ... }
 	// This would potentially allow to always give priority to peers of a certain group
-
-	if len(tags.config.Tags) == 0 {
-		logger.Debug("no tags defined in tags informer")
-		m := api.Metric{
-			Name:          "tag:none",
-			Value:         "",
-			Valid:         false,
-			Partitionable: true,
-		}
-		m.SetTTL(tags.config.MetricTTL)
-		return []api.Metric{m}
-	}
-
-	metrics := make([]api.Metric, 0, len(tags.config.Tags))
-	for n, v := range tags.config.Tags {
-		m := api.Metric{
-			Name:          "tag:" + n,
-			Value:         v,
-			Valid:         true,
-			Partitionable: true,
-		}
-		m.SetTTL(tags.config.MetricTTL)
-		metrics = append(metrics, m)
-	}
-
-	return metrics
+	return nil
 }

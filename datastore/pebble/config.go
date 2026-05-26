@@ -1,17 +1,10 @@
 package pebble
 
 import (
-	"encoding/json"
-	"errors"
-	"path/filepath"
 	"time"
 
-	"dario.cat/mergo"
 	"github.com/cockroachdb/pebble/v2"
 	"github.com/cockroachdb/pebble/v2/bloom"
-	"github.com/cockroachdb/pebble/v2/sstable"
-	"github.com/cockroachdb/pebble/v2/sstable/block"
-	"github.com/kelseyhightower/envconfig"
 
 	"github.com/ipfs-cluster/ipfs-cluster/config"
 )
@@ -108,72 +101,11 @@ type pebbleOptions struct {
 	Levels                      []levelOptions            `json:"levels"`
 }
 
-func (po *pebbleOptions) Unmarshal() *pebble.Options {
-	pebbleOpts := &pebble.Options{}
-	if size := po.CacheSizeBytes; size > 0 {
-		cache := pebble.NewCache(size)
-		pebbleOpts.Cache = cache
-	}
-	pebbleOpts.BytesPerSync = po.BytesPerSync
-	pebbleOpts.DisableWAL = po.DisableWAL
-	pebbleOpts.FlushDelayDeleteRange = po.FlushDelayDeleteRange
-	pebbleOpts.FlushSplitBytes = po.FlushSplitBytes
-	pebbleOpts.FormatMajorVersion = po.FormatMajorVersion
-	pebbleOpts.L0CompactionFileThreshold = po.L0CompactionFileThreshold
-	pebbleOpts.L0CompactionThreshold = po.L0CompactionThreshold
-	pebbleOpts.L0StopWritesThreshold = po.L0StopWritesThreshold
-	pebbleOpts.LBaseMaxBytes = po.LBaseMaxBytes
-	// pebbleOpts.Levels
-	pebbleOpts.MaxOpenFiles = po.MaxOpenFiles
-	pebbleOpts.MemTableSize = po.MemTableSize
-	pebbleOpts.MemTableStopWritesThreshold = po.MemTableStopWritesThreshold
-	pebbleOpts.ReadOnly = po.ReadOnly
-	pebbleOpts.WALBytesPerSync = po.WALBytesPerSync
-	for i := range pebbleOpts.Levels {
-		if len(po.Levels) > i {
-			lvlOpts, targetFileSize := po.Levels[i].Unmarshal()
-			pebbleOpts.Levels[i] = *lvlOpts
-			pebbleOpts.TargetFileSizes[i] = targetFileSize
-		} else {
-			lvlOpts := &pebble.LevelOptions{}
-			prev := lvlOpts
-			tgtFileSize := DefaultL0TargetFileSize
-			if i > 0 {
-				prev = &pebbleOpts.Levels[i-1]
-				tgtFileSize = pebbleOpts.TargetFileSizes[i-1] * 2
-			}
-			defaultLevelOpts(lvlOpts, prev, i)
-			pebbleOpts.Levels[i] = *lvlOpts
-			pebbleOpts.TargetFileSizes[i] = tgtFileSize
-		}
-	}
+func (po *pebbleOptions) Unmarshal() *pebble.Options { _ = "STUB: not implemented"; return nil }
 
-	return pebbleOpts
-}
+// pebbleOpts.Levels
 
-func (po *pebbleOptions) Marshal(pebbleOpts *pebble.Options) {
-	if pebbleOpts.Cache != nil {
-		po.CacheSizeBytes = pebbleOpts.Cache.MaxSize()
-	}
-	po.BytesPerSync = pebbleOpts.BytesPerSync
-	po.DisableWAL = pebbleOpts.DisableWAL
-	po.FlushDelayDeleteRange = pebbleOpts.FlushDelayDeleteRange
-	po.FlushSplitBytes = pebbleOpts.FlushSplitBytes
-	po.FormatMajorVersion = pebbleOpts.FormatMajorVersion
-	po.L0CompactionFileThreshold = pebbleOpts.L0CompactionFileThreshold
-	po.L0CompactionThreshold = pebbleOpts.L0CompactionThreshold
-	po.L0StopWritesThreshold = pebbleOpts.L0StopWritesThreshold
-	po.LBaseMaxBytes = pebbleOpts.LBaseMaxBytes
-	po.Levels = make([]levelOptions, len(pebbleOpts.Levels))
-	for i := range pebbleOpts.Levels {
-		po.Levels[i].Marshal(&pebbleOpts.Levels[i], pebbleOpts.TargetFileSizes[i])
-	}
-	po.MaxOpenFiles = pebbleOpts.MaxOpenFiles
-	po.MemTableSize = pebbleOpts.MemTableSize
-	po.MemTableStopWritesThreshold = pebbleOpts.MemTableStopWritesThreshold
-	po.ReadOnly = pebbleOpts.ReadOnly
-	po.WALBytesPerSync = pebbleOpts.WALBytesPerSync
-}
+func (po *pebbleOptions) Marshal(pebbleOpts *pebble.Options) { _ = "STUB: not implemented"; return }
 
 // levelOptions carries options for pebble's per-level parameters.
 // Compression used to be:
@@ -199,57 +131,18 @@ type levelOptions struct {
 }
 
 func (lo *levelOptions) Unmarshal() (*pebble.LevelOptions, int64) {
-	levelOpts := &pebble.LevelOptions{}
-	levelOpts.BlockRestartInterval = lo.BlockRestartInterval
-	levelOpts.BlockSize = lo.BlockSize
-	levelOpts.BlockSizeThreshold = lo.BlockSizeThreshold
-	// On prevous relesases we could return the int. Now we need to provide a profile.
-	levelOpts.Compression = func() *sstable.CompressionProfile {
-		switch lo.Compression {
-		case 0:
-			return block.DefaultCompression
-		case 1:
-			return block.NoCompression
-		case 2:
-			return block.SnappyCompression
-		case 3:
-			return block.ZstdCompression
-		default:
-			return block.NoCompression
-		}
-	}
-	levelOpts.FilterType = lo.FilterType
-	levelOpts.FilterPolicy = bloom.FilterPolicy(lo.FilterPolicy)
-	levelOpts.IndexBlockSize = lo.IndexBlockSize
-	return levelOpts, lo.TargetFileSize
+	_ = "STUB: not implemented"
+	return nil, 0
 }
+
+// On prevous relesases we could return the int. Now we need to provide a profile.
 
 func (lo *levelOptions) Marshal(levelOpts *pebble.LevelOptions, targetFileSize int64) {
-	lo.BlockRestartInterval = levelOpts.BlockRestartInterval
-	lo.BlockSize = levelOpts.BlockSize
-	lo.BlockSizeThreshold = levelOpts.BlockSizeThreshold
-	if comp := levelOpts.Compression(); comp != nil {
-		switch comp.Name {
-		case "snappy":
-			lo.Compression = 2
-		case "zlib":
-			lo.Compression = 3
-		default:
-			lo.Compression = 1 // NoCompression
-		}
-	} else {
-		lo.Compression = 1
-
-	}
-	lo.FilterType = levelOpts.FilterType
-
-	if fp, ok := levelOpts.FilterPolicy.(bloom.FilterPolicy); ok {
-		lo.FilterPolicy = fp
-	}
-
-	lo.IndexBlockSize = levelOpts.IndexBlockSize
-	lo.TargetFileSize = targetFileSize
+	_ = "STUB: not implemented"
+	return
 }
+
+// NoCompression
 
 type jsonConfig struct {
 	Folder        string        `json:"folder,omitempty"`
@@ -258,145 +151,44 @@ type jsonConfig struct {
 
 // ConfigKey returns a human-friendly identifier for this type of Datastore.
 func (cfg *Config) ConfigKey() string {
-	return configKey
+	_ = "STUB: not implemented"
+
+	// Default initializes this Config with sensible values.
+	return ""
 }
 
-// Default initializes this Config with sensible values.
-func (cfg *Config) Default() error {
-	cfg.Folder = DefaultSubFolder
-	cfg.PebbleOptions = DefaultPebbleOptions
+func (cfg *Config) Default() error { _ = "STUB: not implemented"; return nil }
 
-	cfg.PebbleOptions.Logger = logger
-	eventListener := pebble.MakeLoggingEventListener(logger)
-	cfg.PebbleOptions.EventListener = &eventListener
+// cfg.PebbleOptions.Levels = make([]pebble.LevelOptions, 7) // fixed to [7]LevelOptions
 
-	cache := pebble.NewCache(DefaultCacheSize)
-	cfg.PebbleOptions.Cache = cache
-	cfg.PebbleOptions.FormatMajorVersion = DefaultFormatMajorVersion
-	cfg.PebbleOptions.MemTableSize = DefaultMemTableSize
-	cfg.PebbleOptions.MemTableStopWritesThreshold = DefaultMemTableStopWritesThreshold
-	cfg.PebbleOptions.BytesPerSync = DefaultBytesPerSync
-	cfg.PebbleOptions.MaxOpenFiles = DefaultMaxOpenFiles
-	cfg.PebbleOptions.L0CompactionThreshold = DefaultL0CompactionThreshold
-	cfg.PebbleOptions.L0CompactionFileThreshold = DefaultL0CompactionFileThreshold
-	cfg.PebbleOptions.L0StopWritesThreshold = DefaultL0StopWritesThreshold
-	cfg.PebbleOptions.LBaseMaxBytes = DefaultLBaseMaxBytes
+// Deprecated: cfg.PebbleOptions.Levels[0].TargetFileSize = DefaultL0TargetFileSize
+//added
 
-	// cfg.PebbleOptions.Levels = make([]pebble.LevelOptions, 7) // fixed to [7]LevelOptions
-	for i := 0; i < len(cfg.PebbleOptions.Levels); i++ {
-		l := &cfg.PebbleOptions.Levels[i]
-		prev := l
-		if i > 0 {
-			prev = &cfg.PebbleOptions.Levels[i-1]
-		}
-		defaultLevelOpts(l, prev, i)
-	}
-	// Deprecated: cfg.PebbleOptions.Levels[0].TargetFileSize = DefaultL0TargetFileSize
-	cfg.PebbleOptions.TargetFileSizes[0] = DefaultL0TargetFileSize //added
-	for i := 0; i < len(cfg.PebbleOptions.TargetFileSizes); i++ {
-		if i > 0 {
-			cfg.PebbleOptions.TargetFileSizes[i] = cfg.PebbleOptions.TargetFileSizes[i-1] * 2
-		}
-	}
+func defaultLevelOpts(l, prev *pebble.LevelOptions, i int) { _ = "STUB: not implemented"; return }
 
-	return nil
-}
-
-func defaultLevelOpts(l, prev *pebble.LevelOptions, i int) {
-	l.BlockSize = DefaultBlockSize
-	l.FilterPolicy = DefaultFilterPolicy
-	l.FilterType = pebble.TableFilter
-	if i == 0 {
-		l.EnsureL0Defaults() // does not overwite, only sets the rest.
-	} else {
-		l.EnsureL1PlusDefaults(prev)
-	}
-}
+// does not overwite, only sets the rest.
 
 // ApplyEnvVars fills in any Config fields found as environment variables.
-func (cfg *Config) ApplyEnvVars() error {
-	jcfg := cfg.toJSONConfig()
-
-	err := envconfig.Process(envConfigKey, jcfg)
-	if err != nil {
-		return err
-	}
-
-	return cfg.applyJSONConfig(jcfg)
-}
+func (cfg *Config) ApplyEnvVars() error { _ = "STUB: not implemented"; return nil }
 
 // Validate checks that the fields of this Config have working values,
 // at least in appearance.
-func (cfg *Config) Validate() error {
-	if cfg.Folder == "" {
-		return errors.New("folder is unset")
-	}
-
-	if err := cfg.PebbleOptions.Validate(); err != nil {
-		return err
-	}
-
-	return nil
-}
+func (cfg *Config) Validate() error { _ = "STUB: not implemented"; return nil }
 
 // LoadJSON reads the fields of this Config from a JSON byteslice as
 // generated by ToJSON.
-func (cfg *Config) LoadJSON(raw []byte) error {
-	jcfg := &jsonConfig{}
-	err := json.Unmarshal(raw, jcfg)
-	if err != nil {
-		return err
-	}
-	cfg.Default()
+func (cfg *Config) LoadJSON(raw []byte) error { _ = "STUB: not implemented"; return nil }
 
-	return cfg.applyJSONConfig(jcfg)
-}
-
-func (cfg *Config) applyJSONConfig(jcfg *jsonConfig) error {
-	config.SetIfNotDefault(jcfg.Folder, &cfg.Folder)
-
-	pebbleOpts := jcfg.PebbleOptions.Unmarshal()
-
-	if err := mergo.Merge(&cfg.PebbleOptions, pebbleOpts, mergo.WithOverride); err != nil {
-		return err
-	}
-
-	return cfg.Validate()
-}
+func (cfg *Config) applyJSONConfig(jcfg *jsonConfig) error { _ = "STUB: not implemented"; return nil }
 
 // ToJSON generates a JSON-formatted human-friendly representation of this
 // Config.
-func (cfg *Config) ToJSON() (raw []byte, err error) {
-	jcfg := cfg.toJSONConfig()
+func (cfg *Config) ToJSON() (raw []byte, err error) { _ = "STUB: not implemented"; return nil, nil }
 
-	raw, err = config.DefaultJSONMarshal(jcfg)
-	return
-}
-
-func (cfg *Config) toJSONConfig() *jsonConfig {
-	jCfg := &jsonConfig{}
-
-	if cfg.Folder != DefaultSubFolder {
-		jCfg.Folder = cfg.Folder
-	}
-
-	po := &pebbleOptions{}
-	po.Marshal(&cfg.PebbleOptions)
-	jCfg.PebbleOptions = *po
-
-	return jCfg
-}
+func (cfg *Config) toJSONConfig() *jsonConfig { _ = "STUB: not implemented"; return nil }
 
 // GetFolder returns the Pebble folder.
-func (cfg *Config) GetFolder() string {
-	if filepath.IsAbs(cfg.Folder) {
-		return cfg.Folder
-	}
-
-	return filepath.Join(cfg.BaseDir, cfg.Folder)
-}
+func (cfg *Config) GetFolder() string { _ = "STUB: not implemented"; return "" }
 
 // ToDisplayJSON returns JSON config as a string.
-func (cfg *Config) ToDisplayJSON() ([]byte, error) {
-	return config.DisplayJSON(cfg.toJSONConfig())
-}
+func (cfg *Config) ToDisplayJSON() ([]byte, error) { _ = "STUB: not implemented"; return nil, nil }

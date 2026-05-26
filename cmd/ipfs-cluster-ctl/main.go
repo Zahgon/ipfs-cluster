@@ -90,24 +90,14 @@ var (
 // 	Addr string `json:"peer_multiaddress"`
 // }
 
-func out(m string, a ...interface{}) {
-	fmt.Fprintf(os.Stderr, m, a...)
-}
+func out(m string, a ...interface{}) { _ = "STUB: not implemented"; return }
 
 // checkErr is a helper function to check for errors and exit. formatResponse() does its own error handling for api.Error responses.
-func checkErr(doing string, err error) {
-	if err != nil {
-		out("error %s: %s\n", doing, err)
-		switch {
-		case errors.Is(err, context.DeadlineExceeded):
-			os.Exit(62) // ETIME
-		case errors.Is(err, context.Canceled):
-			os.Exit(125) // ECANCELED
-		default:
-			os.Exit(1)
-		}
-	}
-}
+func checkErr(doing string, err error) { _ = "STUB: not implemented"; return }
+
+// ETIME
+
+// ECANCELED
 
 func main() {
 	ctx := context.Background()
@@ -1170,75 +1160,21 @@ daemon, otherwise on all IPFS daemons.
 	}
 }
 
-func localFlag() cli.BoolFlag {
-	return cli.BoolFlag{
-		Name:  "local",
-		Usage: "run operation only on the contacted peer",
-	}
-}
+func localFlag() cli.BoolFlag { _ = "STUB: not implemented"; return *new(cli.BoolFlag) }
 
-func walkCommands(cmds []cli.Command, parentHelpName string) {
-	for _, c := range cmds {
-		h := c.HelpName
-		// Sometimes HelpName is empty
-		if h == "" {
-			h = fmt.Sprintf("%s %s", parentHelpName, c.FullName())
-		}
-		fmt.Println(h)
-		walkCommands(c.Subcommands, h)
-	}
-}
+func walkCommands(cmds []cli.Command, parentHelpName string) { _ = "STUB: not implemented"; return }
 
-func formatResponse(c *cli.Context, resp interface{}, err error) {
-	enc := c.GlobalString("encoding")
-	if resp == nil && err == nil {
-		return
-	}
+// Sometimes HelpName is empty
 
-	if err != nil {
-		cerr, ok := err.(api.Error)
-		if !ok {
-			checkErr("", err)
-		}
-		switch enc {
-		case "text":
-			textFormatPrintError(cerr)
-		case "json":
-			jsonFormatPrint(cerr)
-		default:
-			checkErr("", errors.New("unsupported encoding selected"))
-		}
-		if cerr.Code == 0 {
-			os.Exit(1) // problem with the call
-		} else {
-			os.Exit(2) // call went fine, response has an error
-		}
-	}
+func formatResponse(c *cli.Context, resp interface{}, err error) { _ = "STUB: not implemented"; return }
 
-	switch enc {
-	case "text":
-		textFormatObject(resp)
-	case "json":
-		jsonFormatObject(resp)
-	default:
-		checkErr("", errors.New("unsupported encoding selected"))
-	}
-}
+// problem with the call
 
-func parseCredentials(userInput string) (string, string) {
-	credentials := strings.SplitN(userInput, ":", 2)
-	switch len(credentials) {
-	case 1:
-		// only username passed in (with no trailing `:`), return empty password
-		return credentials[0], ""
-	case 2:
-		return credentials[0], credentials[1]
-	default:
-		err := fmt.Errorf("invalid <username>[:<password>] input")
-		checkErr("parsing credentials", err)
-		return "", ""
-	}
-}
+// call went fine, response has an error
+
+func parseCredentials(userInput string) (string, string) { _ = "STUB: not implemented"; return "", "" }
+
+// only username passed in (with no trailing `:`), return empty password
 
 func handlePinResponseFormatFlags(
 	ctx context.Context,
@@ -1246,35 +1182,11 @@ func handlePinResponseFormatFlags(
 	pin api.Pin,
 	target api.TrackerStatus,
 ) {
-
-	var status api.GlobalPinInfo
-	var cerr error
-
-	if c.Bool("wait") {
-		var limit int
-		if c.IsSet("wait-limit") {
-			limit = c.Int("wait-limit")
-		} else {
-			limit = 0
-			if target == api.TrackerStatusPinned {
-				limit = pin.ReplicationFactorMin
-			}
-		}
-		status, cerr = waitFor(pin.Cid, target, c.Duration("wait-timeout"), limit)
-		checkErr("waiting for pin status", cerr)
-	}
-
-	if c.Bool("no-status") {
-		formatResponse(c, pin, nil)
-		return
-	}
-
-	if !status.Defined() { // no status from "wait"
-		time.Sleep(time.Second)
-		status, cerr = globalClient.Status(ctx, pin.Cid, false)
-	}
-	formatResponse(c, status, cerr)
+	_ = "STUB: not implemented"
+	return
 }
+
+// no status from "wait"
 
 func waitFor(
 	ci api.Cid,
@@ -1282,38 +1194,11 @@ func waitFor(
 	timeout time.Duration,
 	limit int,
 ) (api.GlobalPinInfo, error) {
-
-	ctx := context.Background()
-
-	if timeout > defaultWaitCheckFreq {
-		var cancel context.CancelFunc
-		ctx, cancel = context.WithTimeout(ctx, timeout)
-		defer cancel()
-	}
-
-	fp := client.StatusFilterParams{
-		Cid:       ci,
-		Local:     false,
-		Target:    target,
-		CheckFreq: defaultWaitCheckFreq,
-		Limit:     limit,
-	}
-
-	return client.WaitFor(ctx, globalClient, fp)
+	_ = "STUB: not implemented"
+	return *new(api.GlobalPinInfo), nil
 }
 
-func parseMetadata(metadata []string) map[string]string {
-	metadataMap := make(map[string]string)
-	for _, str := range metadata {
-		parts := strings.SplitN(str, "=", 2)
-		if len(parts) != 2 {
-			checkErr("parsing metadata", errors.New("metadata were not in the format key=value"))
-		}
-		metadataMap[parts[0]] = parts[1]
-	}
-
-	return metadataMap
-}
+func parseMetadata(metadata []string) map[string]string { _ = "STUB: not implemented"; return nil }
 
 // func setupTracing(config tracingConfig) {
 // 	if !config.Enable {

@@ -1,11 +1,7 @@
 package ipfsproxy
 
 import (
-	"fmt"
 	"net/http"
-	"time"
-
-	"github.com/ipfs-cluster/ipfs-cluster/version"
 )
 
 // This file has the collection of header-related functions
@@ -50,67 +46,28 @@ const ipfsHeadersTimestampKey = "proxyHeadersTS"
 
 // ipfsHeaders returns all the headers we want to extract-once from IPFS: a
 // concatenation of extractHeadersDefault and config.ExtractHeadersExtra.
-func (proxy *Server) ipfsHeaders() []string {
-	return append(extractHeadersDefault, proxy.config.ExtractHeadersExtra...)
-}
+func (proxy *Server) ipfsHeaders() []string { _ = "STUB: not implemented"; return nil }
 
 // rememberIPFSHeaders extracts headers and stores them for re-use with
 // setIPFSHeaders.
-func (proxy *Server) rememberIPFSHeaders(hdrs http.Header) {
-	for _, h := range proxy.ipfsHeaders() {
-		proxy.ipfsHeadersStore.Store(h, hdrs[h])
-	}
-	// use the sync map to store the ts
-	proxy.ipfsHeadersStore.Store(ipfsHeadersTimestampKey, time.Now())
-}
+func (proxy *Server) rememberIPFSHeaders(hdrs http.Header) { _ = "STUB: not implemented"; return }
+
+// use the sync map to store the ts
 
 // returns whether we can consider that whatever headers we are
 // storing have a valid TTL still.
-func (proxy *Server) headersWithinTTL() bool {
-	ttl := proxy.config.ExtractHeadersTTL
-	if ttl == 0 {
-		return true
-	}
-
-	tsRaw, ok := proxy.ipfsHeadersStore.Load(ipfsHeadersTimestampKey)
-	if !ok {
-		return false
-	}
-
-	ts, ok := tsRaw.(time.Time)
-	if !ok {
-		return false
-	}
-
-	lifespan := time.Since(ts)
-	return lifespan < ttl
-}
+func (proxy *Server) headersWithinTTL() bool { _ = "STUB: not implemented"; return false }
 
 // setIPFSHeaders adds the known IPFS Headers to the destination
 // and returns true if we could set all the headers in the list and
 // the TTL has not expired.
 // False is used to determine if we need to make a request to try
 // to extract these headers.
-func (proxy *Server) setIPFSHeaders(dest http.Header) bool {
-	r := true
+func (proxy *Server) setIPFSHeaders(dest http.Header) bool { _ = "STUB: not implemented"; return false }
 
-	if !proxy.headersWithinTTL() {
-		r = false
-		// still set those headers we can set in the destination.
-		// We do our best there, since maybe the ipfs daemon
-		// is down and what we have now is all we can use.
-	}
-
-	for _, h := range proxy.ipfsHeaders() {
-		v, ok := proxy.ipfsHeadersStore.Load(h)
-		if !ok {
-			r = false
-			continue
-		}
-		dest[h] = v.([]string)
-	}
-	return r
-}
+// still set those headers we can set in the destination.
+// We do our best there, since maybe the ipfs daemon
+// is down and what we have now is all we can use.
 
 // copyHeadersFromIPFSWithRequest makes a request to IPFS as used by the proxy
 // and copies the given list of hdrs from the response to the dest http.Header
@@ -119,15 +76,7 @@ func (proxy *Server) copyHeadersFromIPFSWithRequest(
 	hdrs []string,
 	dest http.Header, req *http.Request,
 ) error {
-	res, err := proxy.reverseProxy.Transport.RoundTrip(req)
-	if err != nil {
-		logger.Error("error making request for header extraction to ipfs: ", err)
-		return err
-	}
-
-	for _, h := range hdrs {
-		dest[h] = res.Header[h]
-	}
+	_ = "STUB: not implemented"
 	return nil
 }
 
@@ -141,53 +90,34 @@ func (proxy *Server) copyHeadersFromIPFSWithRequest(
 //     were not extracted before or TTL has expired.
 //   - Third, we set our own headers.
 func (proxy *Server) setHeaders(dest http.Header, srcRequest *http.Request) {
-	proxy.setCORSHeaders(dest, srcRequest)
-	proxy.setAdditionalIpfsHeaders(dest, srcRequest)
-	proxy.setClusterProxyHeaders(dest, srcRequest)
+	_ = "STUB: not implemented"
+	return
 }
 
 // see setHeaders
 func (proxy *Server) setCORSHeaders(dest http.Header, srcRequest *http.Request) {
+	_ = "STUB: not implemented"
 	// Fix CORS headers by making an OPTIONS request
-
-	// The request URL only has a valid Path(). See http.Request docs.
-	srcURL := fmt.Sprintf("%s%s", proxy.nodeAddr, srcRequest.URL.Path)
-	req, err := http.NewRequest(http.MethodOptions, srcURL, nil)
-	if err != nil { // this should really not happen.
-		logger.Error(err)
-		return
-	}
-
-	req.Header["Origin"] = srcRequest.Header["Origin"]
-	req.Header.Set("Access-Control-Request-Method", srcRequest.Method)
-	// error is logged. We proceed if request failed.
-	proxy.copyHeadersFromIPFSWithRequest(corsHeaders, dest, req)
+	return
 }
+
+// The request URL only has a valid Path(). See http.Request docs.
+
+// this should really not happen.
+
+// error is logged. We proceed if request failed.
 
 // see setHeaders
 func (proxy *Server) setAdditionalIpfsHeaders(dest http.Header, srcRequest *http.Request) {
+	_ = "STUB: not implemented"
 	// Avoid re-requesting these if we have them
-	if ok := proxy.setIPFSHeaders(dest); ok {
-		return
-	}
-
-	srcURL := fmt.Sprintf("%s%s", proxy.nodeAddr, proxy.config.ExtractHeadersPath)
-	req, err := http.NewRequest(http.MethodPost, srcURL, nil)
-	if err != nil {
-		logger.Error("error extracting additional headers from ipfs", err)
-		return
-	}
-	// error is logged. We proceed if request failed.
-	proxy.copyHeadersFromIPFSWithRequest(
-		proxy.ipfsHeaders(),
-		dest,
-		req,
-	)
-	proxy.rememberIPFSHeaders(dest)
+	return
 }
+
+// error is logged. We proceed if request failed.
 
 // see setHeaders
 func (proxy *Server) setClusterProxyHeaders(dest http.Header, srcRequest *http.Request) {
-	dest.Set("Content-Type", "application/json")
-	dest.Set("Server", fmt.Sprintf("ipfs-cluster/ipfsproxy/%s", version.Version))
+	_ = "STUB: not implemented"
+	return
 }
